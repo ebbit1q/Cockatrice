@@ -1,5 +1,4 @@
 #include "shortcutstab.h"
-#include "ui_shortcutstab.h"
 
 #include "../settingscache.h"
 #include <QMessageBox>

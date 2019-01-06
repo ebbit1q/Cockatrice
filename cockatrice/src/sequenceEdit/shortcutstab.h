@@ -1,14 +1,10 @@
 #ifndef SHORTCUTSTAB_H
 #define SHORTCUTSTAB_H
 
+#include "ui_shortcutstab.h"
 #include <QWidget>
 
 #include "../dlg_settings.h"
-
-namespace Ui
-{
-class shortcutsTab;
-}
 
 class ShortcutsTab : public AbstractSettingsPage
 {

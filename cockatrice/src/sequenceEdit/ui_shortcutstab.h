@@ -21,8 +21,12 @@ QT_BEGIN_NAMESPACE
 
 #define WIKI "https://github.com/Cockatrice/Cockatrice/wiki/Custom-Keyboard-Shortcuts"
 
-class Ui_shortcutsTab
+namespace Ui
 {
+class shortcutsTab : public QObject
+{
+//    Q_OBJECT
+
 public:
     QGridLayout *gridLayout_9;
     QTabWidget *tabWidget;
@@ -358,6 +362,10 @@ public:
     QLabel *faqLabel;
     QPushButton *btnResetAll;
     QPushButton *btnClearAll;
+
+    shortcutsTab() {}
+
+    ~shortcutsTab() {}
 
     void setupUi(QWidget *shortcutsTab)
     {
@@ -1822,188 +1830,173 @@ public:
 
     void retranslateUi(QWidget * /*shortcutsTab */)
     {
-        groupBox->setTitle(QApplication::translate("shortcutsTab", "Main Window", 0));
-        lbl_MainWindow_aDeckEditor->setText(QApplication::translate("shortcutsTab", "Deck editor", 0));
-        lbl_MainWindow_aSinglePlayer->setText(QApplication::translate("shortcutsTab", "Local gameplay", 0));
-        lbl_MainWindow_aWatchReplay->setText(QApplication::translate("shortcutsTab", "Watch replay", 0));
-        lbl_MainWindow_aConnect->setText(QApplication::translate("shortcutsTab", "Connect", 0));
-        lbl_MainWindow_aRegister->setText(QApplication::translate("shortcutsTab", "Register", 0));
-        lbl_MainWindow_aFullScreen->setText(QApplication::translate("shortcutsTab", "Full screen", 0));
-        lbl_MainWindow_aSettings->setText(QApplication::translate("shortcutsTab", "Settings", 0));
-        lbl_MainWindow_aCheckCardUpdates->setText(QApplication::translate("shortcutsTab", "Check for card updates", 0));
-        lbl_MainWindow_aDisconnect->setText(QApplication::translate("shortcutsTab", "Disconnect", 0));
-        lbl_MainWindow_aExit->setText(QApplication::translate("shortcutsTab", "Exit", 0));
-        groupBox_2->setTitle(QApplication::translate("shortcutsTab", "Deck Editor", 0));
-        lbl_TabDeckEditor_aAnalyzeDeck->setText(QApplication::translate("shortcutsTab", "Analyze deck", 0));
-        lbl_TabDeckEditor_aLoadDeckFromClipboard->setText(
-            QApplication::translate("shortcutsTab", "Load deck (clipboard)", 0));
-        lbl_TabDeckEditor_aClearFilterAll->setText(QApplication::translate("shortcutsTab", "Clear all filters", 0));
-        lbl_TabDeckEditor_aNewDeck->setText(QApplication::translate("shortcutsTab", "New deck", 0));
-        lbl_TabDeckEditor_aClearFilterOne->setText(QApplication::translate("shortcutsTab", "Clear selected filter", 0));
-        lbl_TabDeckEditor_aOpenCustomFolder->setText(
-            QApplication::translate("shortcutsTab", "Open custom pic folder", 0));
-        lbl_TabDeckEditor_aClose->setText(QApplication::translate("shortcutsTab", "Close", 0));
-        lbl_TabDeckEditor_aPrintDeck->setText(QApplication::translate("shortcutsTab", "Print deck", 0));
-        lbl_TabDeckEditor_aManageSets->setText(QApplication::translate("shortcutsTab", "Manage sets", 0));
-        lbl_TabDeckEditor_aRemoveCard->setText(QApplication::translate("shortcutsTab", "Delete card", 0));
-        lbl_TabDeckEditor_aEditTokens->setText(QApplication::translate("shortcutsTab", "Edit tokens", 0));
-        lbl_TabDeckEditor_aResetLayout->setText(QApplication::translate("shortcutsTab", "Reset layout", 0));
-        lbl_TabDeckEditor_aIncrement->setText(QApplication::translate("shortcutsTab", "Add card", 0));
-        lbl_TabDeckEditor_aSaveDeck->setText(QApplication::translate("shortcutsTab", "Save deck", 0));
-        lbl_TabDeckEditor_aExportDeckDecklist->setText(QApplication::translate("shortcutsTab", "Export deck", 0));
-        lbl_TabDeckEditor_aDecrement->setText(QApplication::translate("shortcutsTab", "Remove card", 0));
-        lbl_TabDeckEditor_aSaveDeckAs->setText(QApplication::translate("shortcutsTab", "Save deck as", 0));
-        lbl_TabDeckEditor_aLoadDeck->setText(QApplication::translate("shortcutsTab", "Load deck", 0));
-        lbl_TabDeckEditor_aSaveDeckToClipboard->setText(QApplication::translate("shortcutsTab", "Save deck (clip)", 0));
-        lbl_TabDeckEditor_aSaveDeckToClipboardRaw->setText(
-            QApplication::translate("shortcutsTab", "Save deck (clip; no annotations)", 0));
-        groupBox_3->setTitle(QApplication::translate("shortcutsTab", "Counters", 0));
-        groupBox_4->setTitle(QApplication::translate("shortcutsTab", "Life", 0));
-        lbl_abstractCounter_sSet->setText(QApplication::translate("shortcutsTab", "Set", 0));
-        lbl_abstractCounter_aInc->setText(QApplication::translate("shortcutsTab", "Add", 0));
-        lbl_abstractCounter_aDec->setText(QApplication::translate("shortcutsTab", "Remove", 0));
-        groupBox_5->setTitle(QApplication::translate("shortcutsTab", "Red", 0));
-        lbl_Player_aSCRed->setText(QApplication::translate("shortcutsTab", "Set", 0));
-        lbl_Player_aCCRed->setText(QApplication::translate("shortcutsTab", "Add", 0));
-        lbl_Player_aRCRed->setText(QApplication::translate("shortcutsTab", "Remove", 0));
-        groupBox_6->setTitle(QApplication::translate("shortcutsTab", "Green", 0));
-        lbl_Player_aSCGreen->setText(QApplication::translate("shortcutsTab", "Set", 0));
-        lbl_Player_aCCGreen->setText(QApplication::translate("shortcutsTab", "Add", 0));
-        lbl_Player_aRCGreen->setText(QApplication::translate("shortcutsTab", "Remove", 0));
-        groupBox_7->setTitle(QApplication::translate("shortcutsTab", "Yellow", 0));
-        lbl_Player_aSCYellow->setText(QApplication::translate("shortcutsTab", "Set", 0));
-        lbl_Player_aCCYellow->setText(QApplication::translate("shortcutsTab", "Add", 0));
-        lbl_Player_aRCYellow->setText(QApplication::translate("shortcutsTab", "Remove", 0));
+        groupBox->setTitle(tr("Main Window"));
+        lbl_MainWindow_aDeckEditor->setText(tr("Deck editor"));
+        lbl_MainWindow_aSinglePlayer->setText(tr("Local gameplay"));
+        lbl_MainWindow_aWatchReplay->setText(tr("Watch replay"));
+        lbl_MainWindow_aConnect->setText(tr("Connect"));
+        lbl_MainWindow_aRegister->setText(tr("Register"));
+        lbl_MainWindow_aFullScreen->setText(tr("Full screen"));
+        lbl_MainWindow_aSettings->setText(tr("Settings"));
+        lbl_MainWindow_aCheckCardUpdates->setText(tr("Check for card updates"));
+        lbl_MainWindow_aDisconnect->setText(tr("Disconnect"));
+        lbl_MainWindow_aExit->setText(tr("Exit"));
+        groupBox_2->setTitle(tr("Deck Editor"));
+        lbl_TabDeckEditor_aAnalyzeDeck->setText(tr("Analyze deck"));
+        lbl_TabDeckEditor_aLoadDeckFromClipboard->setText(tr("Load deck (clipboard)"));
+        lbl_TabDeckEditor_aClearFilterAll->setText(tr("Clear all filters"));
+        lbl_TabDeckEditor_aNewDeck->setText(tr("New deck"));
+        lbl_TabDeckEditor_aClearFilterOne->setText(tr("Clear selected filter"));
+        lbl_TabDeckEditor_aOpenCustomFolder->setText(tr("Open custom pic folder"));
+        lbl_TabDeckEditor_aClose->setText(tr("Close"));
+        lbl_TabDeckEditor_aPrintDeck->setText(tr("Print deck"));
+        lbl_TabDeckEditor_aManageSets->setText(tr("Manage sets"));
+        lbl_TabDeckEditor_aRemoveCard->setText(tr("Delete card"));
+        lbl_TabDeckEditor_aEditTokens->setText(tr("Edit tokens"));
+        lbl_TabDeckEditor_aResetLayout->setText(tr("Reset layout"));
+        lbl_TabDeckEditor_aIncrement->setText(tr("Add card"));
+        lbl_TabDeckEditor_aSaveDeck->setText(tr("Save deck"));
+        lbl_TabDeckEditor_aExportDeckDecklist->setText(tr("Export deck"));
+        lbl_TabDeckEditor_aDecrement->setText(tr("Remove card"));
+        lbl_TabDeckEditor_aSaveDeckAs->setText(tr("Save deck as"));
+        lbl_TabDeckEditor_aLoadDeck->setText(tr("Load deck"));
+        lbl_TabDeckEditor_aSaveDeckToClipboard->setText(tr("Save deck (clip)"));
+        lbl_TabDeckEditor_aSaveDeckToClipboardRaw->setText(tr("Save deck (clip; no annotations)"));
+        groupBox_3->setTitle(tr("Counters"));
+        groupBox_4->setTitle(tr("Life"));
+        lbl_abstractCounter_sSet->setText(tr("Set"));
+        lbl_abstractCounter_aInc->setText(tr("Add"));
+        lbl_abstractCounter_aDec->setText(tr("Remove"));
+        groupBox_5->setTitle(tr("Red"));
+        lbl_Player_aSCRed->setText(tr("Set"));
+        lbl_Player_aCCRed->setText(tr("Add"));
+        lbl_Player_aRCRed->setText(tr("Remove"));
+        groupBox_6->setTitle(tr("Green"));
+        lbl_Player_aSCGreen->setText(tr("Set"));
+        lbl_Player_aCCGreen->setText(tr("Add"));
+        lbl_Player_aRCGreen->setText(tr("Remove"));
+        groupBox_7->setTitle(tr("Yellow"));
+        lbl_Player_aSCYellow->setText(tr("Set"));
+        lbl_Player_aCCYellow->setText(tr("Add"));
+        lbl_Player_aRCYellow->setText(tr("Remove"));
 
-        groupBox_counterStorm->setTitle(QApplication::translate("shortcutsTab", "Storm", 0));
-        lbl_Player_aSetCStorm->setText(QApplication::translate("shortcutsTab", "Set", 0));
-        lbl_Player_aIncCStorm->setText(QApplication::translate("shortcutsTab", "Add", 0));
-        lbl_Player_aDecCStorm->setText(QApplication::translate("shortcutsTab", "Remove", 0));
-        groupBox_counterW->setTitle(QApplication::translate("shortcutsTab", "W", 0));
-        lbl_Player_aSetCW->setText(QApplication::translate("shortcutsTab", "Set", 0));
-        lbl_Player_aIncCW->setText(QApplication::translate("shortcutsTab", "Add", 0));
-        lbl_Player_aDecCW->setText(QApplication::translate("shortcutsTab", "Remove", 0));
-        groupBox_counterU->setTitle(QApplication::translate("shortcutsTab", "U", 0));
-        lbl_Player_aSetCU->setText(QApplication::translate("shortcutsTab", "Set", 0));
-        lbl_Player_aIncCU->setText(QApplication::translate("shortcutsTab", "Add", 0));
-        lbl_Player_aDecCU->setText(QApplication::translate("shortcutsTab", "Remove", 0));
-        groupBox_counterB->setTitle(QApplication::translate("shortcutsTab", "B", 0));
-        lbl_Player_aSetCB->setText(QApplication::translate("shortcutsTab", "Set", 0));
-        lbl_Player_aIncCB->setText(QApplication::translate("shortcutsTab", "Add", 0));
-        lbl_Player_aDecCB->setText(QApplication::translate("shortcutsTab", "Remove", 0));
-        groupBox_counterR->setTitle(QApplication::translate("shortcutsTab", "R", 0));
-        lbl_Player_aSetCR->setText(QApplication::translate("shortcutsTab", "Set", 0));
-        lbl_Player_aIncCR->setText(QApplication::translate("shortcutsTab", "Add", 0));
-        lbl_Player_aDecCR->setText(QApplication::translate("shortcutsTab", "Remove", 0));
-        groupBox_counterG->setTitle(QApplication::translate("shortcutsTab", "G", 0));
-        lbl_Player_aSetCG->setText(QApplication::translate("shortcutsTab", "Set", 0));
-        lbl_Player_aIncCG->setText(QApplication::translate("shortcutsTab", "Add", 0));
-        lbl_Player_aDecCG->setText(QApplication::translate("shortcutsTab", "Remove", 0));
-        groupBox_counterX->setTitle(QApplication::translate("shortcutsTab", "X", 0));
-        lbl_Player_aSetCX->setText(QApplication::translate("shortcutsTab", "Set", 0));
-        lbl_Player_aIncCX->setText(QApplication::translate("shortcutsTab", "Add", 0));
-        lbl_Player_aDecCX->setText(QApplication::translate("shortcutsTab", "Remove", 0));
+        groupBox_counterStorm->setTitle(tr("Storm"));
+        lbl_Player_aSetCStorm->setText(tr("Set"));
+        lbl_Player_aIncCStorm->setText(tr("Add"));
+        lbl_Player_aDecCStorm->setText(tr("Remove"));
+        groupBox_counterW->setTitle(tr("W"));
+        lbl_Player_aSetCW->setText(tr("Set"));
+        lbl_Player_aIncCW->setText(tr("Add"));
+        lbl_Player_aDecCW->setText(tr("Remove"));
+        groupBox_counterU->setTitle(tr("U"));
+        lbl_Player_aSetCU->setText(tr("Set"));
+        lbl_Player_aIncCU->setText(tr("Add"));
+        lbl_Player_aDecCU->setText(tr("Remove"));
+        groupBox_counterB->setTitle(tr("B"));
+        lbl_Player_aSetCB->setText(tr("Set"));
+        lbl_Player_aIncCB->setText(tr("Add"));
+        lbl_Player_aDecCB->setText(tr("Remove"));
+        groupBox_counterR->setTitle(tr("R"));
+        lbl_Player_aSetCR->setText(tr("Set"));
+        lbl_Player_aIncCR->setText(tr("Add"));
+        lbl_Player_aDecCR->setText(tr("Remove"));
+        groupBox_counterG->setTitle(tr("G"));
+        lbl_Player_aSetCG->setText(tr("Set"));
+        lbl_Player_aIncCG->setText(tr("Add"));
+        lbl_Player_aDecCG->setText(tr("Remove"));
+        groupBox_counterX->setTitle(tr("X"));
+        lbl_Player_aSetCX->setText(tr("Set"));
+        lbl_Player_aIncCX->setText(tr("Add"));
+        lbl_Player_aDecCX->setText(tr("Remove"));
 
-        lbl_Player_aSCYellow->setText(QApplication::translate("shortcutsTab", "Set", 0));
-        lbl_Player_aCCYellow->setText(QApplication::translate("shortcutsTab", "Add", 0));
-        lbl_Player_aRCYellow->setText(QApplication::translate("shortcutsTab", "Remove", 0));
-        tabWidget->setTabText(tabWidget->indexOf(tab),
-                              QApplication::translate("shortcutsTab", "Main Window | Deck Editor", 0));
-        groupBox_9->setTitle(QApplication::translate("shortcutsTab", "Power / Toughness", 0));
-        groupBox_12->setTitle(QApplication::translate("shortcutsTab", "Power and Toughness", 0));
-        lbl_Player_aIncPT->setText(QApplication::translate("shortcutsTab", "Add (+1/+1)", 0));
-        lbl_Player_aDecPT->setText(QApplication::translate("shortcutsTab", "Remove (-1/-1)", 0));
-        lbl_Player_aResetPT->setText(QApplication::translate("shortcutsTab", "Reset", 0));
-        lbl_Player_aSetPT->setText(QApplication::translate("shortcutsTab", "Set", 0));
-        groupBox_11->setTitle(QApplication::translate("shortcutsTab", "Toughness", 0));
-        lbl_Player_aDecT->setText(QApplication::translate("shortcutsTab", "Remove (-0/-1)", 0));
-        lbl_Player_aIncT->setText(QApplication::translate("shortcutsTab", "Add (+0/+1)", 0));
-        groupBox_10->setTitle(QApplication::translate("shortcutsTab", "Power", 0));
-        lbl_Player_aDecP->setText(QApplication::translate("shortcutsTab", "Remove (-1/-0)", 0));
-        lbl_Player_IncP->setText(QApplication::translate("shortcutsTab", "Add (+1/+0)", 0));
-        groupBox_8->setTitle(QApplication::translate("shortcutsTab", "Game Phases", 0));
-        lbl_TabGame_phase0->setText(QApplication::translate("shortcutsTab", "Untap", 0));
-        lbl_TabGame_phase1->setText(QApplication::translate("shortcutsTab", "Upkeep", 0));
-        lbl_TabGame_phase2->setText(QApplication::translate("shortcutsTab", "Draw", 0));
-        lbl_TabGame_phase3->setText(QApplication::translate("shortcutsTab", "Main 1", 0));
-        lbl_TabGame_phase4->setText(QApplication::translate("shortcutsTab", "Start combat", 0));
-        lbl_TabGame_phase5->setText(QApplication::translate("shortcutsTab", "Attack", 0));
-        lbl_TabGame_phase6->setText(QApplication::translate("shortcutsTab", "Block", 0));
-        lbl_TabGame_phase7->setText(QApplication::translate("shortcutsTab", "Damage", 0));
-        lbl_TabGame_phase8->setText(QApplication::translate("shortcutsTab", "End combat", 0));
-        lbl_TabGame_phase9->setText(QApplication::translate("shortcutsTab", "Main 2", 0));
-        lbl_TabGame_phase10->setText(QApplication::translate("shortcutsTab", "End", 0));
-        lbl_TabGame_aNextPhase->setText(QApplication::translate("shortcutsTab", "Next phase", 0));
-        lbl_TabGame_aNextTurn->setText(QApplication::translate("shortcutsTab", "Next turn", 0));
-        groupBox_13->setTitle(QApplication::translate("shortcutsTab", "Playing Area", 0));
-        lbl_Player_aTap->setText(QApplication::translate("shortcutsTab", "Tap / Untap Card", 0));
-        lbl_Player_aUntapAll->setText(QApplication::translate("shortcutsTab", "Untap all", 0));
-        lbl_Player_aDoesntUntap->setText(QApplication::translate("shortcutsTab", "Toggle untap", 0));
-        lbl_Player_aFlip->setText(QApplication::translate("shortcutsTab", "Flip card", 0));
-        lbl_Player_aPeek->setText(QApplication::translate("shortcutsTab", "Peek card", 0));
-        lbl_Player_aPlay->setText(QApplication::translate("shortcutsTab", "Play card", 0));
-        lbl_Player_aAttach->setText(QApplication::translate("shortcutsTab", "Attach card", 0));
-        lbl_Player_aUnattach->setText(QApplication::translate("shortcutsTab", "Unattach card", 0));
-        lbl_Player_aClone->setText(QApplication::translate("shortcutsTab", "Clone card", 0));
-        lbl_Player_aCreateToken->setText(QApplication::translate("shortcutsTab", "Create token", 0));
-        lbl_Player_aCreateRelatedTokens->setText(
-            QApplication::translate("shortcutsTab", "Create all related tokens", 0));
-        lbl_Player_aCreateAnotherToken->setText(QApplication::translate("shortcutsTab", "Create another token", 0));
-        lbl_Player_aSetAnnotation->setText(QApplication::translate("shortcutsTab", "Set annotation", 0));
-        tabWidget->setTabText(tabWidget->indexOf(tab_2),
-                              QApplication::translate("shortcutsTab", "Phases | P/T | Playing Area", 0));
-        groupBox_moveCard->setTitle(QApplication::translate("shortcutsTab", "Move selected card to", 0));
-        lbl_Player_aMoveToBottomLibrary->setText(QApplication::translate("shortcutsTab", "Bottom library", 0));
-        lbl_Player_aMoveToTopLibrary->setText(QApplication::translate("shortcutsTab", "Top library", 0));
-        lbl_Player_aMoveToGraveyard->setText(QApplication::translate("shortcutsTab", "Graveyard", 0));
-        lbl_Player_aMoveToExile->setText(QApplication::translate("shortcutsTab", "Exile", 0));
-        lbl_Player_aMoveToHand->setText(QApplication::translate("shortcutsTab", "Hand", 0));
-        lbl_Player_aMoveTopToPlayFaceDown->setText(QApplication::translate("shortcutsTab", "Play face down"));
-        groupBox_view->setTitle(QApplication::translate("shortcutsTab", "View", 0));
-        lbl_Player_aViewGraveyard->setText(QApplication::translate("shortcutsTab", "Graveyard", 0));
-        lbl_Player_aViewLibrary->setText(QApplication::translate("shortcutsTab", "Library", 0));
-        lbl_Player_aViewTopCards->setText(QApplication::translate("shortcutsTab", "Top cards of library", 0));
-        lbl_Player_aViewSideboard->setText(QApplication::translate("shortcutsTab", "Sideboard", 0));
-        lbl_Player_aViewRfg->setText(QApplication::translate("shortcutsTab", "Exile", 0));
-        lbl_GameView_aCloseMostRecentZoneView->setText(QApplication::translate("shortcutsTab", "Close recent view", 0));
-        groupBox_moveDeck->setTitle(QApplication::translate("shortcutsTab", "Move top card to", 0));
-        lbl_Player_aMoveTopCardToGraveyard->setText(QApplication::translate("shortcutsTab", "Graveyard Once", 0));
-        lbl_Player_aMoveTopCardsToGraveyard->setText(QApplication::translate("shortcutsTab", "Graveyard Multiple", 0));
-        lbl_Player_aMoveTopCardToExile->setText(QApplication::translate("shortcutsTab", "Exile Once", 0));
-        lbl_Player_aMoveTopCardsToExile->setText(QApplication::translate("shortcutsTab", "Exile Multiple", 0));
-        groupBox_gameLobby->setTitle(QApplication::translate("shortcutsTab", "Game Lobby", 0));
-        lbl_DeckViewContainer_loadRemoteButton->setText(QApplication::translate("shortcutsTab", "Load remote deck", 0));
-        lbl_DeckViewContainer_loadLocalButton->setText(QApplication::translate("shortcutsTab", "Load local deck", 0));
-        groupBox_gameplay->setTitle(QApplication::translate("shortcutsTab", "Gameplay", 0));
-        lbl_Player_aDrawArrow->setText(QApplication::translate("shortcutsTab", "Draw arrow", 0));
-        lbl_TabGame_aLeaveGame->setText(QApplication::translate("shortcutsTab", "Leave game", 0));
-        lbl_TabGame_aRemoveLocalArrows->setText(QApplication::translate("shortcutsTab", "Remove local arrows", 0));
-        lbl_TabGame_aConcede->setText(QApplication::translate("shortcutsTab", "Concede", 0));
-        lbl_Player_aRollDie->setText(QApplication::translate("shortcutsTab", "Roll dice", 0));
-        lbl_TabGame_aRotateViewCW->setText(QApplication::translate("shortcutsTab", "Rotate view CW", 0));
-        lbl_Player_aShuffle->setText(QApplication::translate("shortcutsTab", "Shuffle library", 0));
-        lbl_TabGame_aRotateViewCCW->setText(QApplication::translate("shortcutsTab", "Rotate view CCW", 0));
-        groupBox_draw->setTitle(QApplication::translate("shortcutsTab", "Drawing", 0));
-        lbl_Player_aMulligan->setText(QApplication::translate("shortcutsTab", "Mulligan", 0));
-        lbl_Player_aDrawCard->setText(QApplication::translate("shortcutsTab", "Draw card", 0));
-        lbl_Player_aDrawCards->setText(QApplication::translate("shortcutsTab", "Draw cards", 0));
-        lbl_Player_aUndoDraw->setText(QApplication::translate("shortcutsTab", "Undo draw", 0));
-        lbl_Player_aAlwaysRevealTopCard->setText(QApplication::translate("shortcutsTab", "Always reveal top card", 0));
-        tabWidget->setTabText(tabWidget->indexOf(tab_3),
-                              QApplication::translate("shortcutsTab", "Gameplay | Draw | Move | View", 0));
-        tabWidget->setTabText(tabWidget->indexOf(tab_4), QApplication::translate("shortcutsTab", "Counters", 0));
-        faqLabel->setText(QString("<a href='%1'>%2</a>")
-                              .arg(WIKI)
-                              .arg(QApplication::translate("shortcutsTab", "How to set custom shortcuts", 0)));
-        btnResetAll->setText(QApplication::translate("shortcutsTab", "Restore all default shortcuts", 0));
-        btnClearAll->setText(QApplication::translate("shortcutsTab", "Clear all shortcuts", 0));
+        lbl_Player_aSCYellow->setText(tr("Set"));
+        lbl_Player_aCCYellow->setText(tr("Add"));
+        lbl_Player_aRCYellow->setText(tr("Remove"));
+        tabWidget->setTabText(tabWidget->indexOf(tab), tr("Main Window | Deck Editor"));
+        groupBox_9->setTitle(tr("Power / Toughness"));
+        groupBox_12->setTitle(tr("Power and Toughness"));
+        lbl_Player_aIncPT->setText(tr("Add (+1/+1)"));
+        lbl_Player_aDecPT->setText(tr("Remove (-1/-1)"));
+        lbl_Player_aResetPT->setText(tr("Reset"));
+        lbl_Player_aSetPT->setText(tr("Set"));
+        groupBox_11->setTitle(tr("Toughness"));
+        lbl_Player_aDecT->setText(tr("Remove (-0/-1)"));
+        lbl_Player_aIncT->setText(tr("Add (+0/+1)"));
+        groupBox_10->setTitle(tr("Power"));
+        lbl_Player_aDecP->setText(tr("Remove (-1/-0)"));
+        lbl_Player_IncP->setText(tr("Add (+1/+0)"));
+        groupBox_8->setTitle(tr("Game Phases"));
+        lbl_TabGame_phase0->setText(tr("Untap"));
+        lbl_TabGame_phase1->setText(tr("Upkeep"));
+        lbl_TabGame_phase2->setText(tr("Draw"));
+        lbl_TabGame_phase3->setText(tr("Main 1"));
+        lbl_TabGame_phase4->setText(tr("Start combat"));
+        lbl_TabGame_phase5->setText(tr("Attack"));
+        lbl_TabGame_phase6->setText(tr("Block"));
+        lbl_TabGame_phase7->setText(tr("Damage"));
+        lbl_TabGame_phase8->setText(tr("End combat"));
+        lbl_TabGame_phase9->setText(tr("Main 2"));
+        lbl_TabGame_phase10->setText(tr("End"));
+        lbl_TabGame_aNextPhase->setText(tr("Next phase"));
+        lbl_TabGame_aNextTurn->setText(tr("Next turn"));
+        groupBox_13->setTitle(tr("Playing Area"));
+        lbl_Player_aTap->setText(tr("Tap / Untap Card"));
+        lbl_Player_aUntapAll->setText(tr("Untap all"));
+        lbl_Player_aDoesntUntap->setText(tr("Toggle untap"));
+        lbl_Player_aFlip->setText(tr("Flip card"));
+        lbl_Player_aPeek->setText(tr("Peek card"));
+        lbl_Player_aPlay->setText(tr("Play card"));
+        lbl_Player_aAttach->setText(tr("Attach card"));
+        lbl_Player_aUnattach->setText(tr("Unattach card"));
+        lbl_Player_aClone->setText(tr("Clone card"));
+        lbl_Player_aCreateToken->setText(tr("Create token"));
+        lbl_Player_aCreateRelatedTokens->setText(tr("Create all related tokens"));
+        lbl_Player_aCreateAnotherToken->setText(tr("Create another token"));
+        lbl_Player_aSetAnnotation->setText(tr("Set annotation"));
+        tabWidget->setTabText(tabWidget->indexOf(tab_2), tr("Phases | P/T | Playing Area"));
+        groupBox_moveCard->setTitle(tr("Move selected card to"));
+        lbl_Player_aMoveToBottomLibrary->setText(tr("Bottom library"));
+        lbl_Player_aMoveToTopLibrary->setText(tr("Top library"));
+        lbl_Player_aMoveToGraveyard->setText(tr("Graveyard"));
+        lbl_Player_aMoveToExile->setText(tr("Exile"));
+        lbl_Player_aMoveToHand->setText(tr("Hand"));
+        lbl_Player_aMoveTopToPlayFaceDown->setText(tr("Play face down"));
+        groupBox_view->setTitle(tr("View"));
+        lbl_Player_aViewGraveyard->setText(tr("Graveyard"));
+        lbl_Player_aViewLibrary->setText(tr("Library"));
+        lbl_Player_aViewTopCards->setText(tr("Top cards of library"));
+        lbl_Player_aViewSideboard->setText(tr("Sideboard"));
+        lbl_Player_aViewRfg->setText(tr("Exile"));
+        lbl_GameView_aCloseMostRecentZoneView->setText(tr("Close recent view"));
+        groupBox_moveDeck->setTitle(tr("Move top card to"));
+        lbl_Player_aMoveTopCardToGraveyard->setText(tr("Graveyard Once"));
+        lbl_Player_aMoveTopCardsToGraveyard->setText(tr("Graveyard Multiple"));
+        lbl_Player_aMoveTopCardToExile->setText(tr("Exile Once"));
+        lbl_Player_aMoveTopCardsToExile->setText(tr("Exile Multiple"));
+        groupBox_gameLobby->setTitle(tr("Game Lobby"));
+        lbl_DeckViewContainer_loadRemoteButton->setText(tr("Load remote deck"));
+        lbl_DeckViewContainer_loadLocalButton->setText(tr("Load local deck"));
+        groupBox_gameplay->setTitle(tr("Gameplay"));
+        lbl_Player_aDrawArrow->setText(tr("Draw arrow"));
+        lbl_TabGame_aLeaveGame->setText(tr("Leave game"));
+        lbl_TabGame_aRemoveLocalArrows->setText(tr("Remove local arrows"));
+        lbl_TabGame_aConcede->setText(tr("Concede"));
+        lbl_Player_aRollDie->setText(tr("Roll dice"));
+        lbl_TabGame_aRotateViewCW->setText(tr("Rotate view CW"));
+        lbl_Player_aShuffle->setText(tr("Shuffle library"));
+        lbl_TabGame_aRotateViewCCW->setText(tr("Rotate view CCW"));
+        groupBox_draw->setTitle(tr("Drawing"));
+        lbl_Player_aMulligan->setText(tr("Mulligan"));
+        lbl_Player_aDrawCard->setText(tr("Draw card"));
+        lbl_Player_aDrawCards->setText(tr("Draw cards"));
+        lbl_Player_aUndoDraw->setText(tr("Undo draw"));
+        lbl_Player_aAlwaysRevealTopCard->setText(tr("Always reveal top card"));
+        tabWidget->setTabText(tabWidget->indexOf(tab_3), tr("Gameplay | Draw | Move | View"));
+        tabWidget->setTabText(tabWidget->indexOf(tab_4), tr("Counters"));
+        faqLabel->setText(QString("<a href='%1'>%2</a>").arg(WIKI).arg(tr("How to set custom shortcuts")));
+        btnResetAll->setText(tr("Restore all default shortcuts"));
+        btnClearAll->setText(tr("Clear all shortcuts"));
     } // retranslateUi
-};
-
-namespace Ui
-{
-class shortcutsTab : public Ui_shortcutsTab
-{
 };
 } // namespace Ui
 
