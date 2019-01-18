@@ -15,6 +15,7 @@ matrix:
         packages:
         - libprotobuf-dev
         - protobuf-compiler
+        - liblzma-dev
         - qt5-default
         - qttools5-dev
         - qttools5-dev-tools
@@ -73,37 +74,37 @@ matrix:
         - $CACHE/.ccache
         - $CACHE/image
     before_install: source .ci/travis-docker.sh --build --save
-    script: RUN --server --package $NAME --release
+    script: RUN --server --package "$NAME" "RPM" --release
 
   #macOS
   - name: macOS (Debug)
     if: tag IS NOT present
     os: osx
-    osx_image: xcode9.2
-    language: cpp
-    compiler: gcc
-    env: HOMEBREW_NO_AUTO_UPDATE=1
+    osx_image: xcode10.1
     cache: ccache
-    before_install:
-      - brew install ccache
-      - brew install protobuf
-      - brew install qt
-    script: bash .ci/travis-compile.sh --server --install --debug
+    addons:
+      homebrew:
+        packages:
+        - ccache
+        - protobuf
+        - qt
+        - xz
+    script: bash ./.ci/travis-compile.sh --server --install --debug
 
   - name: macOS (Release)
     if: (branch = master AND NOT type = pull_request) OR tag IS present
     os: osx
     osx_image: xcode9.2
-    language: cpp
-    compiler: gcc
-    env: HOMEBREW_NO_AUTO_UPDATE=1
     cache: ccache
-    before_install:
-      - brew install ccache
-      - brew install protobuf
-      - brew install qt
-    script: bash .ci/travis-compile.sh --server --package "$TRAVIS_OS_NAME" --release
-
+    addons:
+      homebrew:
+        packages:
+        - ccache
+        - protobuf
+        - qt
+        - xz
+        update: true
+    script: bash ./.ci/travis-compile.sh --server --package "$TRAVIS_OS_NAME" --release
 
 # Builds for pull requests skip the deployment step altogether
 deploy:
@@ -122,7 +123,7 @@ deploy:
     on:
       tags: true
       repo: Cockatrice/Cockatrice
-      condition: $BUILDTYPE = Release && $TRAVIS_TAG =~ ([0-9]|[1-9][0-9])(\.([0-9]|[1-9][0-9])){2}-beta(\.([2-9]|[1-9][0-9]))?$     # regex to match semver naming convention for beta pre-releases
+      condition: $TRAVIS_TAG =~ ([0-9]|[1-9][0-9])(\.([0-9]|[1-9][0-9])){2}-beta(\.([2-9]|[1-9][0-9]))?$     # regex to match semver naming convention for beta pre-releases
 
 # Deploy configuration for "stable" releases
   - provider: releases
@@ -137,7 +138,7 @@ deploy:
     on:
       tags: true
       repo: Cockatrice/Cockatrice
-      condition: $BUILDTYPE = Release && $TRAVIS_TAG =~ ([0-9]|[1-9][0-9])(\.([0-9]|[1-9][0-9])){2}$    # regex to match semver naming convention for stable full releases
+      condition: $TRAVIS_TAG =~ ([0-9]|[1-9][0-9])(\.([0-9]|[1-9][0-9])){2}$    # regex to match semver naming convention for stable full releases
 
 
 notifications:

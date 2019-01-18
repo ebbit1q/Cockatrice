@@ -114,6 +114,7 @@ SET(cockatrice_SOURCES
     src/settings/messagesettings.cpp
     src/settings/gamefilterssettings.cpp
     src/settings/layoutssettings.cpp
+    src/settings/downloadsettings.cpp
     src/update_downloader.cpp
     src/logger.cpp
     src/releasechannel.cpp
@@ -122,7 +123,7 @@ SET(cockatrice_SOURCES
     src/handle_public_servers.cpp
     src/carddbparser/cockatricexml3.cpp
     ${VERSION_STRING_CPP}
-)
+    )
 
 add_subdirectory(sounds)
 add_subdirectory(themes)
@@ -253,6 +254,8 @@ if(WIN32)
     # these needs to be relative to CMAKE_INSTALL_PREFIX
     set(plugin_dest_dir Plugins)
     set(qtconf_dest_dir .)
+
+    install(DIRECTORY "${CMAKE_BINARY_DIR}/${PROJECT_NAME}/${CMAKE_BUILD_TYPE}/" DESTINATION ./ FILES_MATCHING PATTERN "*.dll")
 
     # qt5 plugins: audio, iconengines, imageformats, platforms, printsupport
     install(DIRECTORY "${QT_PLUGINS_DIR}/" DESTINATION ${plugin_dest_dir} COMPONENT Runtime
