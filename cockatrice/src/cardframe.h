@@ -32,6 +32,7 @@ public:
     };
     explicit CardFrame(const QString &cardName = QString(), QWidget *parent = nullptr);
     void retranslateUi();
+    QSize sizeHint();
 
 public slots:
     void setCard(CardInfoPtr card);

@@ -6,7 +6,7 @@
 #include <QDebug>
 #include <QDesktopWidget>
 Tab::Tab(TabSupervisor *_tabSupervisor, QWidget *parent)
-    : QMainWindow(parent), tabSupervisor(_tabSupervisor), contentsChanged(false), infoPopup(0)
+    : QMainWindow(parent), tabSupervisor(_tabSupervisor), contentsChanged(false), infoPopup(nullptr)
 {
     setAttribute(Qt::WA_DeleteOnClose);
 }
@@ -17,8 +17,9 @@ void Tab::showCardInfoPopup(const QPoint &pos, const QString &cardName)
         infoPopup->deleteLater();
     }
     currentCardName = cardName;
-    infoPopup = new CardInfoWidget(
-        cardName, 0, Qt::Widget | Qt::FramelessWindowHint | Qt::X11BypassWindowManagerHint | Qt::WindowStaysOnTopHint);
+    infoPopup = new CardInfoWidget(cardName, nullptr,
+                                   Qt::Widget | Qt::FramelessWindowHint | Qt::X11BypassWindowManagerHint |
+                                       Qt::WindowStaysOnTopHint);
     infoPopup->setAttribute(Qt::WA_TransparentForMouseEvents);
     QRect screenRect = qApp->desktop()->screenGeometry(this);
     infoPopup->move(qMax(screenRect.left(), qMin(pos.x() - infoPopup->width() / 2,

@@ -55,7 +55,7 @@ CardFrame::CardFrame(const QString &cardName, QWidget *parent) : QTabWidget(pare
     tab3Layout->addWidget(splitter);
     tab3->setLayout(tab3Layout);
 
-    setViewMode(SettingsCache::instance().getCardInfoViewMode());
+    setCurrentIndex(SettingsCache::instance().getCardInfoViewMode());
 
     setCard(db->getCard(cardName));
 }
@@ -69,22 +69,17 @@ void CardFrame::retranslateUi()
 
 void CardFrame::setViewMode(int mode)
 {
-    if (currentIndex() != mode)
-        setCurrentIndex(mode);
-
-    switch (mode) {
-        case ImageOnlyView:
-        case TextOnlyView:
-            tab1Layout->addWidget(pic);
-            tab2Layout->addWidget(text);
-            break;
-        case ImageAndTextView:
-            splitter->addWidget(pic);
-            splitter->addWidget(text);
-            break;
-        default:
-            break;
+    // reparent pic and text when switching, addWidget removes the previous parent
+    if (mode == ImageAndTextView) {
+        splitter->addWidget(pic);
+        splitter->addWidget(text);
+    } else {
+        tab1Layout->addWidget(pic);
+        tab2Layout->addWidget(text);
     }
+    tab1Layout->setSizeConstraint(QLayout::SetNoConstraint);
+    tab2Layout->setSizeConstraint(QLayout::SetNoConstraint);
+    tab3Layout->setSizeConstraint(QLayout::SetNoConstraint);
 
     SettingsCache::instance().setCardInfoViewMode(mode);
 }
@@ -120,4 +115,17 @@ void CardFrame::setCard(AbstractCardItem *card)
 void CardFrame::clearCard()
 {
     setCard((CardInfoPtr) nullptr);
+}
+
+QSize CardFrame::sizeHint()
+{
+    return QSize(0,0);
+    switch (currentIndex()) {
+        default: // ImageOnlyView
+            return tab1->minimumSizeHint();
+        case TextOnlyView:
+            return tab2->minimumSizeHint();
+        case ImageAndTextView:
+            return tab3->minimumSizeHint();
+    }
 }
