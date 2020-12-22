@@ -37,8 +37,8 @@ if(NOT GTEST_FOUND)
     add_dependencies(expression_test gtest)
 endif()
 
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
-set(TEST_QT_MODULES Qt5::Widgets)
+find_package(Qt6 COMPONENTS Widgets REQUIRED)
+set(TEST_QT_MODULES Qt::Widgets)
 
 
 include_directories(${GTEST_INCLUDE_DIRS})

@@ -6,24 +6,24 @@
 # like the installation path, compilation flags etc..
 
 # Cmake 3.1 is required to enable C++11 support correctly
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.16)
 
 # Default to "Release" build type
 # User-provided value for CMAKE_BUILD_TYPE must be checked before the PROJECT() call
-IF(DEFINED CMAKE_BUILD_TYPE)
-   SET(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING "Type of build")
-ELSE()
-   SET(CMAKE_BUILD_TYPE Release CACHE STRING "Type of build")
-ENDIF()
+if(DEFINED CMAKE_BUILD_TYPE)
+   set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING "Type of build")
+else()
+   set(CMAKE_BUILD_TYPE Release CACHE STRING "Type of build")
+endif()
 
 # Early detect ccache
-OPTION(USE_CCACHE "Cache the build results with ccache" ON)
+option(USE_CCACHE "Cache the build results with ccache" ON)
 if(USE_CCACHE)
     find_program(CCACHE_PROGRAM ccache)
     if(CCACHE_PROGRAM)
         # Support Unix Makefiles and Ninja
         set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
-        MESSAGE(STATUS "Found CCache ${CCACHE_PROGRAM}")
+        message(STATUS "Found CCache ${CCACHE_PROGRAM}")
     endif()
 endif()
 
@@ -49,15 +49,16 @@ if(NOT DEFINED GIT_TAG_RELEASENAME)
 endif()
 
 # Use c++11 for all targets
-set(CMAKE_CXX_STANDARD 11 CACHE STRING "C++ ISO Standard")
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_STANDARD 17 CACHE STRING "C++ ISO Standard")
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Set conventional loops
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true)
 
 # Search path for cmake modules
-SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
+# Retrieve git version hash
 include(getversion)
 
 # Create a header and a cpp file containing the version hash
@@ -74,7 +75,7 @@ if(UNIX)
         # Force ccache usage if available
         get_property(RULE_LAUNCH_COMPILE GLOBAL PROPERTY RULE_LAUNCH_COMPILE)
         if(RULE_LAUNCH_COMPILE)
-            MESSAGE(STATUS "Force enabling CCache usage under macOS")
+            message(STATUS "Force enabling CCache usage under macOS")
             # Set up wrapper scripts
             configure_file(${CMAKE_MODULE_PATH}/launch-c.in   launch-c)
             configure_file(${CMAKE_MODULE_PATH}/launch-cxx.in launch-cxx)
@@ -112,7 +113,7 @@ IF(MSVC)
     set(CMAKE_CXX_FLAGS_RELEASE "/Ox /MD /wd4251 ")
     # Generate complete debugging information
     #set(CMAKE_CXX_FLAGS_DEBUG "/Zi")
-ELSEIF (CMAKE_COMPILER_IS_GNUCXX)
+elseif (CMAKE_COMPILER_IS_GNUCXX)
     # linux/gcc, bsd/gcc, windows/mingw
     include(CheckCXXCompilerFlag)
 
@@ -125,24 +126,24 @@ ELSEIF (CMAKE_COMPILER_IS_GNUCXX)
 
     set(ADDITIONAL_DEBUG_FLAGS -Wcast-align -Wmissing-declarations -Wno-long-long -Wno-error=extra -Wno-error=delete-non-virtual-dtor -Wno-error=sign-compare -Wno-error=missing-declarations)
 
-    FOREACH(FLAG ${ADDITIONAL_DEBUG_FLAGS})
+    foreach(FLAG ${ADDITIONAL_DEBUG_FLAGS})
         CHECK_CXX_COMPILER_FLAG("${FLAG}" CXX_HAS_WARNING_${FLAG})
-        IF(CXX_HAS_WARNING_${FLAG})
-            SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${FLAG}")
-        ENDIF()
-    ENDFOREACH()
-ELSE()
+        if(CXX_HAS_WARNING_${FLAG})
+            set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${FLAG}")
+        endif()
+    endforeach()
+else()
     # other: osx/llvm, bsd/llvm
     set(CMAKE_CXX_FLAGS_RELEASE "-O2")
     set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
-ENDIF()
+endif()
 
 # GNU systems need to define the Mersenne exponent for the RNG to compile w/o warning
-IF(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    ADD_DEFINITIONS("-DSFMT_MEXP=19937")
-ENDIF()
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    add_definitions("-DSFMT_MEXP=19937")
+endif()
 
-FIND_PACKAGE(Threads REQUIRED)
+find_package(Threads REQUIRED)
 
 # Find Qt5
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -161,30 +162,24 @@ elseif(DEFINED ENV{QTDIR})
     list(APPEND CMAKE_PREFIX_PATH "$ENV{QTDIR}")
 endif()
 
-FIND_PACKAGE(Qt5Core 5.5.0 REQUIRED)
+find_package(Qt6 COMPONENTS Core REQUIRED)
 
-IF(Qt5Core_FOUND)
-    MESSAGE(STATUS "Found Qt ${Qt5Core_VERSION_STRING}")
-
-    # FIX: Qt was built with -reduce-relocations
-    if (Qt5_POSITION_INDEPENDENT_CODE)
-        SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
-    endif()
+if(Qt6_FOUND)
+    message(STATUS "Found Qt ${Qt6_VERSION_STRING} at ${Qt6_DIR}")
 
     # guess plugins and libraries directory
-    set(QT_PLUGINS_DIR "${Qt5Core_DIR}/../../../plugins")
-    get_target_property(QT_LIBRARY_DIR Qt5::Core LOCATION)
+    set(QT_PLUGINS_DIR "${Qt6_DIR}/../../../plugins")
+    get_target_property(QT_LIBRARY_DIR Qt6::Core LOCATION)
     get_filename_component(QT_LIBRARY_DIR ${QT_LIBRARY_DIR} PATH)
-
-ELSE()
-    MESSAGE(FATAL_ERROR "No Qt5 found!")
-ENDIF()
+else()
+    message(FATAL_ERROR "No Qt found!")
+endif()
 
 # Check for translation updates
-OPTION(UPDATE_TRANSLATIONS "Update translations on compile" OFF)
-MESSAGE(STATUS "UPDATE TRANSLATIONS: ${UPDATE_TRANSLATIONS}")
+option(UPDATE_TRANSLATIONS "Update translations on compile" OFF)
+message(STATUS "UPDATE TRANSLATIONS: ${UPDATE_TRANSLATIONS}")
 
-set(CMAKE_AUTOMOC TRUE)
+set(CMAKE_AUTOMOC ON)
 
 # Find other needed libraries
 FIND_PACKAGE(Protobuf REQUIRED)
@@ -195,14 +190,14 @@ ELSE()
 ENDIF()
 
 #Find OpenSSL
-IF(WIN32)
-    FIND_PACKAGE(Win32SslRuntime)
-ENDIF()
+if(WIN32)
+    find_package(Win32SslRuntime)
+endif()
 
 #Find VCredist
-IF(MSVC)
-    FIND_PACKAGE(VCredistRuntime)
-ENDIF()
+if(MSVC)
+    find_package(VCredistRuntime)
+endif()
 
 # Package builder
 set(CPACK_PACKAGE_CONTACT "Zach Halpern <zahalpern+github@gmail.com>")
@@ -225,12 +220,12 @@ if(UNIX)
         set(CPACK_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}/cockatrice/resources/appicon.icns")
     else()
         # linux
-        IF(CPACK_GENERATOR STREQUAL "RPM")
+        if(CPACK_GENERATOR STREQUAL "RPM")
             set(CPACK_RPM_PACKAGE_LICENSE "GPLv2")
             set(CPACK_RPM_PACKAGE_REQUIRES "protobuf, qt5-qttools, qt5-qtsvg, qt5-qtmultimedia")
             set(CPACK_RPM_PACKAGE_GROUP "Amusements/Games")
             set(CPACK_RPM_PACKAGE_URL "http://github.com/Cockatrice/Cockatrice")
-        ELSE()
+        else()
             set(CPACK_GENERATOR DEB)
             set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
             set(CPACK_DEBIAN_PACKAGE_SECTION "games")
@@ -254,7 +249,7 @@ elseif(WIN32)
 
     # include vcredist into the package; NSIS will take care of running it
     if(VCREDISTRUNTIME_FOUND)
-        INSTALL(FILES "${VCREDISTRUNTIME_FILE}" DESTINATION ./)
+        install(FILES "${VCREDISTRUNTIME_FILE}" DESTINATION ./)
     endif()
 endif()
 
@@ -265,28 +260,28 @@ option(WITH_SERVER "build servatrice" OFF)
 add_subdirectory(common)
 if(WITH_SERVER)
     add_subdirectory(servatrice)
-    SET(CPACK_INSTALL_CMAKE_PROJECTS "Servatrice;Servatrice;ALL;/" ${CPACK_INSTALL_CMAKE_PROJECTS})
+    set(CPACK_INSTALL_CMAKE_PROJECTS "Servatrice;Servatrice;ALL;/" ${CPACK_INSTALL_CMAKE_PROJECTS})
 endif()
 
 # Compile cockatrice (default on)
 option(WITH_CLIENT "build cockatrice" ON)
 if(WITH_CLIENT)
     add_subdirectory(cockatrice)
-    SET(CPACK_INSTALL_CMAKE_PROJECTS "Cockatrice;Cockatrice;ALL;/" ${CPACK_INSTALL_CMAKE_PROJECTS})
+    set(CPACK_INSTALL_CMAKE_PROJECTS "Cockatrice;Cockatrice;ALL;/" ${CPACK_INSTALL_CMAKE_PROJECTS})
 endif()
 
 # Compile oracle (default on)
 option(WITH_ORACLE "build oracle" ON)
 if(WITH_ORACLE)
     add_subdirectory(oracle)
-    SET(CPACK_INSTALL_CMAKE_PROJECTS "Oracle;Oracle;ALL;/" ${CPACK_INSTALL_CMAKE_PROJECTS})
+    set(CPACK_INSTALL_CMAKE_PROJECTS "Oracle;Oracle;ALL;/" ${CPACK_INSTALL_CMAKE_PROJECTS})
 endif()
 
 # Compile dbconverter (default on)
 option(WITH_DBCONVERTER "build dbconverter" ON)
 if(WITH_DBCONVERTER)
     add_subdirectory(dbconverter)
-    SET(CPACK_INSTALL_CMAKE_PROJECTS "Dbconverter;Dbconverter;ALL;/" ${CPACK_INSTALL_CMAKE_PROJECTS})
+    set(CPACK_INSTALL_CMAKE_PROJECTS "Dbconverter;Dbconverter;ALL;/" ${CPACK_INSTALL_CMAKE_PROJECTS})
 endif()
 
 # Compile tests (default off)

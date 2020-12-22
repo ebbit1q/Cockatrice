@@ -52,30 +52,30 @@ if(APPLE)
     set(oracle_SOURCES ${oracle_SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/resources/appicon.icns)
 ENDIF(APPLE)
 
-# Qt5
-find_package(Qt5 COMPONENTS Concurrent Network Svg Widgets REQUIRED)
-set(ORACLE_QT_MODULES Qt5::Concurrent Qt5::Network Qt5::Svg Qt5::Widgets)
+# Qt
+find_package(Qt6 COMPONENTS Concurrent Network Svg Widgets REQUIRED)
+set(ORACLE_QT_MODULES Qt::Concurrent Qt::Network Qt::Svg Qt::Widgets)
 
-# Qt5LinguistTools
-find_package(Qt5LinguistTools)
-if(Qt5LinguistTools_FOUND)
-    list(APPEND ORACLE_LIBS Qt5::LinguistTools)
+# QtLinguistTools
+find_package(QtLinguistTools)
+if(QtLinguistTools_FOUND)
+    list(APPEND ORACLE_LIBS Qt::LinguistTools)
 
-    if(NOT Qt5_LRELEASE_EXECUTABLE)
+    if(NOT Qt6_LRELEASE_EXECUTABLE)
         MESSAGE(WARNING "Qt's lrelease not found.")
     endif()
 
     if(UPDATE_TRANSLATIONS)
-        if(NOT Qt5_LUPDATE_EXECUTABLE)
+        if(NOT Qt6_LUPDATE_EXECUTABLE)
             MESSAGE(WARNING "Qt's lupdate not found.")
         endif()
-        QT5_CREATE_TRANSLATION(oracle_QM ${translate_SRCS} ${oracle_TS})
+        QT6_CREATE_TRANSLATION(oracle_QM ${translate_SRCS} ${oracle_TS})
     else()
-        QT5_ADD_TRANSLATION(oracle_QM ${oracle_TS})
+        QT6_ADD_TRANSLATION(oracle_QM ${oracle_TS})
     endif()
 endif()
 
-QT5_ADD_RESOURCES(oracle_RESOURCES_RCC ${oracle_RESOURCES})
+QT6_ADD_RESOURCES(oracle_RESOURCES_RCC ${oracle_RESOURCES})
 
 INCLUDE_DIRECTORIES(../cockatrice/src)
 
@@ -152,7 +152,7 @@ if(APPLE)
     set(qtconf_dest_dir oracle.app/Contents/Resources)
     get_filename_component(QT_LIBRARY_DIR "${QT_LIBRARY_DIR}/.." ABSOLUTE)
 
-    # qt5 plugins: iconengines, platforms
+    # qt plugins: iconengines, platforms
     install(DIRECTORY "${QT_PLUGINS_DIR}/" DESTINATION ${plugin_dest_dir} COMPONENT Runtime
         FILES_MATCHING
         PATTERN "*.dSYM" EXCLUDE
@@ -185,7 +185,7 @@ IF(WIN32)
 
     install(DIRECTORY "${CMAKE_BINARY_DIR}/${PROJECT_NAME}/${CMAKE_BUILD_TYPE}/" DESTINATION ./ FILES_MATCHING PATTERN "*.dll")
 
-    # qt5 plugins: iconengines, platforms
+    # qt plugins: iconengines, platforms
 
     install(DIRECTORY "${QT_PLUGINS_DIR}/" DESTINATION ${plugin_dest_dir} COMPONENT Runtime
         FILES_MATCHING REGEX "(iconengines|platforms|styles)/.*[^d]\\.dll")

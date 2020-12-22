@@ -13,12 +13,12 @@ SET(dbconverter_SOURCES
     ${VERSION_STRING_CPP}
 )
 
-# Qt5
-find_package(Qt5 COMPONENTS Network Widgets REQUIRED)
-set(dbconverter_QT_MODULES Qt5::Core Qt5::Network Qt5::Widgets)
+# Qt
+find_package(Qt6 COMPONENTS Network Widgets REQUIRED)
+set(dbconverter_QT_MODULES Qt::Core Qt::Network Qt::Widgets)
 SET(QT_DONT_USE_QTGUI TRUE)
 
-QT5_WRAP_CPP(dbconverter_SOURCES
+QT6_WRAP_CPP(dbconverter_SOURCES
     ../cockatrice/src/settingscache.h
     ../cockatrice/src/settings/carddatabasesettings.h
 )
@@ -27,7 +27,7 @@ QT5_WRAP_CPP(dbconverter_SOURCES
 ADD_EXECUTABLE(dbconverter MACOSX_BUNDLE ${dbconverter_SOURCES} ${dbconverter_MOC_SRCS})
 
 if(MSVC)
-    TARGET_LINK_LIBRARIES(dbconverter ${dbconverter_QT_MODULES} Qt5::WinMain)
+    TARGET_LINK_LIBRARIES(dbconverter ${dbconverter_QT_MODULES} Qt::WinMain)
 else()
     TARGET_LINK_LIBRARIES(dbconverter ${dbconverter_QT_MODULES})
 endif()
@@ -57,7 +57,7 @@ if(APPLE)
     set(qtconf_dest_dir dbconverter.app/Contents/Resources)
     get_filename_component(QT_LIBRARY_DIR "${QT_LIBRARY_DIR}/.." ABSOLUTE)
 
-    # qt5 plugins: platforms, sqldrivers/mysql
+    # qt plugins: platforms, sqldrivers/mysql
     install(DIRECTORY "${QT_PLUGINS_DIR}/" DESTINATION ${plugin_dest_dir} COMPONENT Runtime
         FILES_MATCHING
         PATTERN "*.dSYM" EXCLUDE
@@ -87,7 +87,7 @@ if(WIN32)
 
     install(DIRECTORY "${CMAKE_BINARY_DIR}/${PROJECT_NAME}/${CMAKE_BUILD_TYPE}/" DESTINATION ./ FILES_MATCHING PATTERN "*.dll")
 
-    # qt5 plugins: platforms, sqldrivers/mysql
+    # qt plugins: platforms, sqldrivers/mysql
     install(DIRECTORY "${QT_PLUGINS_DIR}/" DESTINATION ${plugin_dest_dir} COMPONENT Runtime
         FILES_MATCHING REGEX "(platforms/.*)\\.dll"
         REGEX ".*d\\.dll" EXCLUDE)
