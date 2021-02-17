@@ -95,9 +95,9 @@ void CardItem::retranslateUi()
 
 void CardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    painter->save();
     AbstractCardItem::paint(painter, option, widget);
 
+    painter->save();
     int i = 0;
     QMapIterator<int, int> counterIterator(counters);
     while (counterIterator.hasNext()) {
@@ -108,6 +108,7 @@ void CardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
         paintNumberEllipse(counterIterator.value(), 14, color, i, counters.size(), painter);
         ++i;
     }
+    painter->restore();
 
     QSizeF translatedSize = getTranslatedSize(painter);
     qreal scaleFactor = translatedSize.width() / boundingRect().width();
@@ -160,12 +161,9 @@ void CardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
         const int penWidth = 1;
         pen.setWidth(penWidth);
         painter->setPen(pen);
-        painter->drawRect(QRectF(0, 0, translatedSize.width() + penWidth, translatedSize.height() - penWidth));
-
+        painter->drawRect(QRectF(0, 0, translatedSize.width() - penWidth, translatedSize.height() - penWidth));
         painter->restore();
     }
-
-    painter->restore();
 }
 
 void CardItem::setAttacking(bool _attacking)

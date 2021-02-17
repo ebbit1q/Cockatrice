@@ -112,26 +112,17 @@ void AbstractCardItem::paintPicture(QPainter *painter, const QSizeF &translatedS
     }
 
     painter->save();
-
     if (paintImage) {
-        painter->save();
         transformPainter(painter, translatedSize, angle);
-        painter->drawPixmap(QPointF(1, 1), translatedPixmap);
-        painter->restore();
+        painter->drawPixmap(QPointF(0, 0), translatedPixmap);
     } else {
         painter->setBrush(bgColor);
+        if (!angle)
+            painter->drawRect(QRectF(0, 0, CARD_WIDTH, CARD_HEIGHT));
+        else
+            painter->drawRect(QRectF(1, 1, CARD_WIDTH, CARD_HEIGHT));
     }
-
-    QPen pen(Qt::black);
-    pen.setJoinStyle(Qt::MiterJoin);
-    const int penWidth = 2;
-    pen.setWidth(penWidth);
-    painter->setPen(pen);
-
-    if (!angle)
-        painter->drawRect(QRectF(0, 0, CARD_WIDTH - 1, CARD_HEIGHT - penWidth));
-    else
-        painter->drawRect(QRectF(1, 1, CARD_WIDTH - 2, CARD_HEIGHT - 1.5));
+    painter->restore();
 
     if (translatedPixmap.isNull() || SettingsCache::instance().getDisplayCardNames() || facedown) {
         painter->save();
@@ -149,8 +140,6 @@ void AbstractCardItem::paintPicture(QPainter *painter, const QSizeF &translatedS
                           Qt::AlignTop | Qt::AlignLeft | Qt::TextWrapAnywhere, nameStr);
         painter->restore();
     }
-
-    painter->restore();
 }
 
 void AbstractCardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem * /*option*/, QWidget * /*widget*/)
@@ -160,7 +149,6 @@ void AbstractCardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *
     QSizeF translatedSize = getTranslatedSize(painter);
     paintPicture(painter, translatedSize, tapAngle);
 
-    painter->save();
     painter->setRenderHint(QPainter::Antialiasing, false);
     transformPainter(painter, translatedSize, tapAngle);
 
@@ -173,10 +161,8 @@ void AbstractCardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *
         const int penWidth = 1;
         pen.setWidth(penWidth);
         painter->setPen(pen);
-        painter->drawRect(QRectF(0, 0, translatedSize.width() + penWidth, translatedSize.height() - penWidth));
+        painter->drawRect(QRectF(0, 0, translatedSize.width() - penWidth, translatedSize.height() - penWidth));
     }
-
-    painter->restore();
 
     painter->restore();
 }
@@ -202,7 +188,7 @@ void AbstractCardItem::setHovered(bool _hovered)
     if (_hovered)
         processHoverEvent();
     isHovered = _hovered;
-    setZValue(_hovered ? 2000000004 : realZValue);
+    setZValue(_hovered ? 2000000004 : realZValue); // FIXME magic values
     setScale(_hovered && SettingsCache::instance().getScaleCards() ? 1.1 : 1);
     setTransformOriginPoint(_hovered ? CARD_WIDTH / 2 : 0, _hovered ? CARD_HEIGHT / 2 : 0);
     update();
