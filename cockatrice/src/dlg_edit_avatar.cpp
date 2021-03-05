@@ -75,6 +75,6 @@ QByteArray DlgEditAvatar::getImage()
     QByteArray ba;
     QBuffer buffer(&ba);
     buffer.open(QIODevice::WriteOnly);
-    image.save(&buffer, "JPG");
+    image.save(&buffer, "webp");
     return ba;
 }
