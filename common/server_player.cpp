@@ -1177,14 +1177,13 @@ Server_Player::cmdRollDie(const Command_RollDie &cmd, ResponseContainer & /*rc*/
         return Response::RespContextError;
     }
 
-    const auto validatedSides = static_cast<int>(std::min(std::max(cmd.sides(), MINIMUM_DIE_SIDES), MAXIMUM_DIE_SIDES));
-    const auto validatedDiceToRoll =
-        static_cast<int>(std::min(std::max(cmd.count(), MINIMUM_DICE_TO_ROLL), MAXIMUM_DICE_TO_ROLL));
+    const uint32_t validatedSides = std::min(std::max(cmd.sides(), MINIMUM_DIE_SIDES), MAXIMUM_DIE_SIDES);
+    const uint32_t validatedDiceToRoll = std::min(std::max(cmd.count(), MINIMUM_DICE_TO_ROLL), MAXIMUM_DICE_TO_ROLL);
 
     Event_RollDie event;
     event.set_sides(validatedSides);
-    for (auto i = 0; i < validatedDiceToRoll; ++i) {
-        const auto roll = rng->rand(1, validatedSides);
+    for (uint32_t i = 0; i < validatedDiceToRoll; ++i) {
+        const auto roll = rng->cdf(1, validatedSides);
         if (i == 0) {
             // Backwards compatibility
             event.set_value(roll);

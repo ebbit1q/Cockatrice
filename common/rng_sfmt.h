@@ -32,12 +32,11 @@ class RNG_SFMT : public RNG_Abstract
 private:
     QMutex mutex;
     sfmt_t sfmt;
-    // The discrete cumulative distribution function for the RNG
-    unsigned int cdf(unsigned int min, unsigned int max);
 
 public:
     explicit RNG_SFMT(QObject *parent = nullptr);
     unsigned int rand(int min, int max) override;
+    uint64_t cdf(uint64_t min, uint64_t max) override;
 };
 
 #endif

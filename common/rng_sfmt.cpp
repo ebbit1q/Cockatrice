@@ -99,7 +99,7 @@ unsigned int RNG_SFMT::rand(int min, int max)
  * Otherwise you will probably skew the outcome of the rand() method or worsen the
  * performance of the application.
  */
-unsigned int RNG_SFMT::cdf(unsigned int min, unsigned int max)
+uint64_t RNG_SFMT::cdf(uint64_t min, uint64_t max)
 {
     // This all makes no sense if min > max, which should never happen.
     if (min > max) {
@@ -111,7 +111,11 @@ unsigned int RNG_SFMT::cdf(unsigned int min, unsigned int max)
     }
 
     // First compute the diameter (aka size, length) of the [min, max] interval
-    const unsigned int diameter = max - min + 1;
+    const uint64_t diameter = max - min + 1;
+    if (diameter == 0) { // on integer overflow max is the highest and min is 0
+        QMutexLocker locker(&mutex);
+        return sfmt_genrand_uint64(&sfmt);
+    }
 
     // Compute how many buckets (each in size of the diameter) will fit into the
     // universe.
@@ -123,15 +127,14 @@ unsigned int RNG_SFMT::cdf(unsigned int min, unsigned int max)
     const uint64_t limit = diameter * buckets;
 
     uint64_t rand;
-    // To make the random number generation thread-safe, a mutex is created around
+    // To make the random number generation thread-safe, a mutex is locked during
     // the generation. Outside of the loop of course, to avoid lock/unlock overhead.
-    mutex.lock();
+    QMutexLocker locker(&mutex);
     do {
         rand = sfmt_genrand_uint64(&sfmt);
     } while (rand >= limit);
-    mutex.unlock();
 
     // Now determine the bucket containing the SFMT() random number and after adding
     // the lower bound, a random number from [min, max] can be returned.
-    return (unsigned int)(rand / buckets + min);
+    return rand / buckets + min;
 }
