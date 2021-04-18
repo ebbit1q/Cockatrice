@@ -12,6 +12,7 @@ public:
     {
     }
     virtual unsigned int rand(int min, int max) = 0;
+    virtual uint64_t cdf(uint64_t min, uint64_t max) = 0;
     QVector<int> makeNumbersVector(int n, int min, int max);
     double testRandom(const QVector<int> &numbers) const;
 };

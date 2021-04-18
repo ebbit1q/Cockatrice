@@ -33,7 +33,7 @@ private:
     QMutex mutex;
     sfmt_t sfmt;
     // The discrete cumulative distribution function for the RNG
-    unsigned int cdf(unsigned int min, unsigned int max);
+    uint64_t cdf(uint64_t min, uint64_t max);
 
 public:
     RNG_SFMT(QObject *parent = 0);

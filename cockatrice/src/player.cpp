@@ -1524,8 +1524,8 @@ void Player::actUntapAll()
 void Player::actRollDie()
 {
     bool ok;
-    int sides = QInputDialog::getInt(game, tr("Roll die"), tr("Number of sides:"), defaultNumberDieRoll, minDieRoll,
-                                     maxDieRoll, 1, &ok);
+    unsigned int sides = QInputDialog::getInt(game, tr("Roll die"), tr("Number of sides:"), defaultNumberDieRoll,
+                                              minDieRoll, maxDieRoll, 1, &ok);
     if (ok) {
         defaultNumberDieRoll = sides;
         Command_RollDie cmd;

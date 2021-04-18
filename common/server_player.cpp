@@ -1048,7 +1048,7 @@ Server_Player::cmdRollDie(const Command_RollDie &cmd, ResponseContainer & /*rc*/
 
     Event_RollDie event;
     event.set_sides(cmd.sides());
-    event.set_value(rng->rand(1, cmd.sides()));
+    event.set_value(rng->cdf(1, cmd.sides()));
     ges.enqueueGameEvent(event, playerId);
 
     return Response::RespOk;
