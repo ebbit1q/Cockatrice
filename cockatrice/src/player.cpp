@@ -3074,6 +3074,42 @@ void Player::actSetPT()
     game->sendGameCommand(prepareGameCommand(commandList), playerid);
 }
 
+void Player::actSetRotation()
+{
+    int playerid = id;
+    bool ok;
+
+    auto sel = scene()->selectedItems();
+    if (sel.isEmpty()) {
+        return;
+    }
+    auto *firstCard = static_cast<CardItem *>(sel.first());
+    int oldRotation = card->getRotation();
+
+    dialogSemaphore = true;
+    QString rotation = QInputDialog::getText(nullptr, tr("Rotate card"), tr("Change rotation in degrees to:"), QLineEdit::Normal, oldRotation, &ok);
+    dialogSemaphore = false;
+    if (clearCardsToDelete() || !ok) {
+        return;
+    }
+
+    QList<const ::google::protobuf::Message *> commandList;
+    for (const auto &item : sel) {
+        auto *card = static_cast<CardItem *>(item);
+        auto *cmd = new Command_SetCardAttr;
+        cmd->set_zone(card->getZone()->getName().toStdString());
+        cmd->set_card_id(card->getId());
+        cmd->set_attribute(AttrRotation);
+        cmd->set_attr_value(rotation.toStdString());
+        commandList.append(cmd);
+        if (local) {
+            playerid = card->getZone()->getPlayer()->getId();
+        }
+    }
+
+    game->sendGameCommand(prepareGameCommand(commandList), playerid);
+}
+
 void Player::actDrawArrow()
 {
     if (!game->getActiveCard()) {
