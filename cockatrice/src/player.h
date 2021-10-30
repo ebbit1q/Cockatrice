@@ -264,9 +264,7 @@ private:
     bool conceded;
     int zoneId;
 
-    bool dialogSemaphore;
-    bool clearCardsToDelete();
-    QList<CardItem *> cardsToDelete;
+    QMutex deletionMutex;
 
     DeckLoader *deck;
     QStringList predefinedTokens;
@@ -357,6 +355,7 @@ public:
     void playCard(CardItem *c, bool faceDown, bool tapped);
     void addCard(CardItem *c);
     void deleteCard(CardItem *c);
+    void deleteCards(QList<CardItem *> &cards);
     void addZone(CardZone *z);
 
     AbstractCounter *addCounter(const ServerInfo_Counter &counter);

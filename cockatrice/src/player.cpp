@@ -108,7 +108,7 @@ void PlayerArea::setPlayerZoneId(int _playerZoneId)
 Player::Player(const ServerInfo_User &info, int _id, bool _local, bool _judge, TabGame *_parent)
     : QObject(_parent), game(_parent), shortcutsActive(false), lastTokenDestroy(true), lastTokenTableRow(0), id(_id),
       active(false), local(_local), judge(_judge), mirrored(false), handVisible(false), conceded(false), zoneId(0),
-      dialogSemaphore(false), deck(nullptr)
+      deletionMutex(), deck(nullptr)
 {
     userInfo = new ServerInfo_User;
     userInfo->CopyFrom(info);
@@ -1697,13 +1697,12 @@ bool Player::createRelatedFromRelation(const CardItem *sourceCard, const CardRel
     if (sourceCard == nullptr || cardRelation == nullptr) {
         return false;
     }
+    QMutexLocker locker(&deletionMutex);
     QString dbName = cardRelation->getName();
     if (cardRelation->getIsVariable()) {
         bool ok;
-        dialogSemaphore = true;
         int count = QInputDialog::getInt(game, tr("Create tokens"), tr("Number:"), cardRelation->getDefaultCount(), 1,
                                          MAX_TOKENS_PER_DIALOG, 1, &ok);
-        dialogSemaphore = false;
         if (!ok) {
             return false;
         }
@@ -2503,10 +2502,19 @@ void Player::deleteCard(CardItem *card)
 {
     if (card == nullptr) {
         return;
-    } else if (dialogSemaphore) {
-        cardsToDelete.append(card);
     } else {
+        QMutexLocker locker(&deletionMutex);
         card->deleteLater();
+    }
+}
+
+void Player::deleteCards(QList<CardItem *> &cards)
+{
+    QMutexLocker locker(&deletionMutex);
+    for (auto *card : cards) {
+        if (card != nullptr) {
+            card->deleteLater();
+        }
     }
 }
 
@@ -2701,22 +2709,6 @@ void Player::sendGameCommand(const google::protobuf::Message &command)
 void Player::sendGameCommand(PendingCommand *pend)
 {
     game->sendGameCommand(pend, id);
-}
-
-bool Player::clearCardsToDelete()
-{
-    if (cardsToDelete.isEmpty()) {
-        return false;
-    }
-
-    for (auto &i : cardsToDelete) {
-        if (i != nullptr) {
-            i->deleteLater();
-        }
-    }
-    cardsToDelete.clear();
-
-    return true;
 }
 
 void Player::actMoveCardXCardsFromTop()
@@ -3047,11 +3039,8 @@ void Player::actSetPT()
         }
     }
     bool ok;
-    dialogSemaphore = true;
-    QString pt =
-        getTextWithMax(game, tr("Change power/toughness"), tr("Change stats to:"), QLineEdit::Normal, oldPT, &ok);
-    dialogSemaphore = false;
-    if (clearCardsToDelete() || !ok) {
+    QString pt = getTextWithMax(game, tr("Change power/toughness"), tr("Change stats to:"), QLineEdit::Normal, oldPT, &ok);
+    if (!ok) {
         return;
     }
 
@@ -3059,6 +3048,7 @@ void Player::actSetPT()
     bool empty = ptList.isEmpty();
 
     QList<const ::google::protobuf::Message *> commandList;
+    sel = scene()->selectedItems();
     for (const auto &item : sel) {
         auto *card = static_cast<CardItem *>(item);
         auto *cmd = new Command_SetCardAttr;
@@ -3157,15 +3147,14 @@ void Player::actSetAnnotation()
     }
 
     bool ok;
-    dialogSemaphore = true;
     QString annotation = QInputDialog::getMultiLineText(game, tr("Set annotation"),
                                                         tr("Please enter the new annotation:"), oldAnnotation, &ok)
                              .left(MAX_NAME_LENGTH);
-    dialogSemaphore = false;
-    if (clearCardsToDelete() || !ok) {
+    if (!ok) {
         return;
     }
 
+    sel = scene()->selectedItems();
     QList<const ::google::protobuf::Message *> commandList;
     for (const auto &item : sel) {
         auto *card = static_cast<CardItem *>(item);
@@ -3239,7 +3228,6 @@ void Player::actCardCounterTrigger()
         }
         case 11: { // set counter with dialog
             bool ok;
-            dialogSemaphore = true;
 
             int oldValue = 0;
             if (scene()->selectedItems().size() == 1) {
@@ -3248,8 +3236,7 @@ void Player::actCardCounterTrigger()
             }
             int number = QInputDialog::getInt(game, tr("Set counters"), tr("Number:"), oldValue, 0,
                                               MAX_COUNTERS_ON_CARD, 1, &ok);
-            dialogSemaphore = false;
-            if (clearCardsToDelete() || !ok) {
+            if (!ok) {
                 return;
             }
 
