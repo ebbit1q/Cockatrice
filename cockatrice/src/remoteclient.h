@@ -26,7 +26,6 @@ signals:
                              const QString &_userName,
                              const QString &_password,
                              const QString &_email,
-                             int _gender,
                              const QString &_country,
                              const QString &_realname);
     void sigActivateToServer(const QString &_token);
@@ -65,7 +64,6 @@ private slots:
                             const QString &_userName,
                             const QString &_password,
                             const QString &_email,
-                            int _gender,
                             const QString &_country,
                             const QString &_realname);
     void doLogin();
@@ -125,7 +123,6 @@ public:
                           const QString &_userName,
                           const QString &_password,
                           const QString &_email,
-                          int _gender,
                           const QString &_country,
                           const QString &_realname);
     void activateToServer(const QString &_token);

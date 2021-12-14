@@ -1086,7 +1086,6 @@ Response::ResponseCode AbstractServerSocketInterface::cmdRegisterAccount(const C
     }
 
     QString realName = QString::fromStdString(cmd.real_name());
-    ServerInfo_User_Gender gender = cmd.gender();
     QString country = QString::fromStdString(cmd.country());
     QString password = QString::fromStdString(cmd.password());
 
@@ -1101,7 +1100,7 @@ Response::ResponseCode AbstractServerSocketInterface::cmdRegisterAccount(const C
 
     QString token;
     bool requireEmailActivation = settingsCache->value("registration/requireemailactivation", true).toBool();
-    bool regSucceeded = sqlInterface->registerUser(userName, realName, gender, password, emailAddress, country, token,
+    bool regSucceeded = sqlInterface->registerUser(userName, realName, password, emailAddress, country, token,
                                                    !requireEmailActivation);
 
     if (regSucceeded) {
@@ -1184,16 +1183,14 @@ Response::ResponseCode AbstractServerSocketInterface::cmdAccountEdit(const Comma
 
     QString realName = QString::fromStdString(cmd.real_name());
     QString emailAddress = QString::fromStdString(cmd.email());
-    ServerInfo_User_Gender gender = cmd.gender();
     QString country = QString::fromStdString(cmd.country());
 
     QString userName = QString::fromStdString(userInfo->name());
 
     QSqlQuery *query = sqlInterface->prepareQuery("update {prefix}_users set realname=:realName, email=:email, "
-                                                  "gender=:gender, country=:country where name=:userName");
+                                                  "country=:country where name=:userName");
     query->bindValue(":realName", realName);
     query->bindValue(":email", emailAddress);
-    query->bindValue(":gender", sqlInterface->getGenderChar(gender));
     query->bindValue(":country", country);
     query->bindValue(":userName", userName);
     if (!sqlInterface->execSqlQuery(query))
@@ -1201,7 +1198,6 @@ Response::ResponseCode AbstractServerSocketInterface::cmdAccountEdit(const Comma
 
     userInfo->set_real_name(cmd.real_name());
     userInfo->set_email(cmd.email());
-    userInfo->set_gender(cmd.gender());
     userInfo->set_country(cmd.country());
 
     return Response::RespOk;

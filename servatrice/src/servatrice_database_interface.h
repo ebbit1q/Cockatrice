@@ -9,7 +9,7 @@
 #include <QObject>
 #include <QSqlDatabase>
 
-#define DATABASE_SCHEMA_VERSION 27
+#define DATABASE_SCHEMA_VERSION 28
 
 class Servatrice;
 
@@ -95,7 +95,6 @@ public:
     int checkNumberOfUserAccounts(const QString &email);
     bool registerUser(const QString &userName,
                       const QString &realName,
-                      ServerInfo_User_Gender const &gender,
                       const QString &password,
                       const QString &emailAddress,
                       const QString &country,
@@ -113,7 +112,6 @@ public:
                     const QString &targetName);
     bool
     changeUserPassword(const QString &user, const QString &oldPassword, const QString &newPassword, const bool &force);
-    QChar getGenderChar(ServerInfo_User_Gender const &gender);
     QList<ServerInfo_Ban> getUserBanHistory(const QString userName);
     bool
     addWarning(const QString userName, const QString adminName, const QString warningReason, const QString clientID);
