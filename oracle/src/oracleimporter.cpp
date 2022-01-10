@@ -1,7 +1,6 @@
 #include "oracleimporter.h"
 
 #include "carddbparser/cockatricexml4.h"
-#include "qt-json/json.h"
 
 #include <QtWidgets>
 #include <algorithm>
@@ -23,12 +22,12 @@ bool OracleImporter::readSetsFromByteArray(const QByteArray &data)
 {
     QList<SetToDownload> newSetList;
 
-    bool ok;
-    setsMap = QtJson::Json::parse(QString(data), ok).toMap().value("data").toMap();
-    if (!ok) {
-        qDebug() << "error: QtJson::Json::parse()";
+    auto doc = QJsonDocument::fromJson(data);
+    if (doc.isNull()) {
+        qDebug() << "error: could not parse json";
         return false;
     }
+    setsMap = doc.object().toVariantMap().value("data").toMap();
 
     QListIterator<QVariant> it(setsMap.values());
     QVariantMap map;

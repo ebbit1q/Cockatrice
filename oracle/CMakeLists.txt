@@ -12,7 +12,6 @@ SET(oracle_SOURCES
     src/oraclewizard.cpp
     src/oracleimporter.cpp
     src/pagetemplates.cpp
-    src/qt-json/json.cpp
     ../cockatrice/src/carddatabase.cpp
     ../cockatrice/src/pictureloader.cpp
     ../cockatrice/src/carddbparser/carddatabaseparser.cpp
