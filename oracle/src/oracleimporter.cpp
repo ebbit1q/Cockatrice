@@ -1,11 +1,16 @@
 #include "oracleimporter.h"
 
 #include "carddbparser/cockatricexml4.h"
-#include "qt-json/json.h"
 
 #include <QtWidgets>
 #include <algorithm>
 #include <climits>
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
+#include <QJsonDocument>
+#else
+#include "qt-json/json.h"
+#endif
 
 SplitCardPart::SplitCardPart(const QString &_name,
                              const QString &_text,
@@ -21,26 +26,33 @@ OracleImporter::OracleImporter(const QString &_dataDir, QObject *parent) : CardD
 
 bool OracleImporter::readSetsFromByteArray(const QByteArray &data)
 {
-    QList<SetToDownload> newSetList;
+#ifdef QT_DEBUG
+    qDebug() << "parser started at" << QTime::currentTime();
+#endif
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
+    auto doc = QJsonDocument::fromJson(data);
+    setsMap = doc.object().toVariantMap().value("data").toMap();
+    if (doc.isNull()) {
+#else
     bool ok;
     setsMap = QtJson::Json::parse(QString(data), ok).toMap().value("data").toMap();
     if (!ok) {
-        qDebug() << "error: QtJson::Json::parse()";
+#endif
+        qDebug() << "error: could not parse json";
         return false;
     }
 
-    QListIterator<QVariant> it(setsMap.values());
+    QList<SetToDownload> newSetList;
     QVariantMap map;
-
     QString shortName;
     QString longName;
     QList<QVariant> setCards;
     QString setType;
     QDate releaseDate;
 
-    while (it.hasNext()) {
-        map = it.next().toMap();
+    for (const auto &value : setsMap.values()) {
+        map = value.toMap();
         shortName = map.value("code").toString().toUpper();
         longName = map.value("name").toString();
         setCards = map.value("cards").toList();
@@ -71,6 +83,10 @@ bool OracleImporter::readSetsFromByteArray(const QByteArray &data)
     }
 
     std::sort(newSetList.begin(), newSetList.end());
+
+#ifdef QT_DEBUG
+    qDebug() << "parser finished at" << QTime::currentTime();
+#endif
 
     if (newSetList.isEmpty()) {
         return false;
