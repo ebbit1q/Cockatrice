@@ -20,7 +20,9 @@ OracleImporter::OracleImporter(const QString &_dataDir, QObject *parent) : CardD
 
 bool OracleImporter::readSetsFromByteArray(const QByteArray &data)
 {
-    QList<SetToDownload> newSetList;
+#ifdef QT_DEBUG
+    qDebug() << "parser started at" << QTime::currentTime();
+#endif
 
     auto doc = QJsonDocument::fromJson(data);
     if (doc.isNull()) {
@@ -29,17 +31,16 @@ bool OracleImporter::readSetsFromByteArray(const QByteArray &data)
     }
     setsMap = doc.object().toVariantMap().value("data").toMap();
 
-    QListIterator<QVariant> it(setsMap.values());
+    QList<SetToDownload> newSetList;
     QVariantMap map;
-
     QString shortName;
     QString longName;
     QList<QVariant> setCards;
     QString setType;
     QDate releaseDate;
 
-    while (it.hasNext()) {
-        map = it.next().toMap();
+    for (const auto &value : setsMap.values()) {
+        map = value.toMap();
         shortName = map.value("code").toString().toUpper();
         longName = map.value("name").toString();
         setCards = map.value("cards").toList();
@@ -70,6 +71,10 @@ bool OracleImporter::readSetsFromByteArray(const QByteArray &data)
     }
 
     std::sort(newSetList.begin(), newSetList.end());
+
+#ifdef QT_DEBUG
+    qDebug() << "parser finished at" << QTime::currentTime();
+#endif
 
     if (newSetList.isEmpty()) {
         return false;
