@@ -116,7 +116,7 @@ Servatrice_WebsocketGameServer::Servatrice_WebsocketGameServer(Servatrice *_serv
                                                                QObject *parent)
     : QWebSocketServer("Servatrice", QWebSocketServer::NonSecureMode, parent), server(_server)
 {
-    for (int i = 0; i < _numberPools; ++i) {
+    for (int i = 0; i < (_numberPools ? 1 : 0); ++i) { // stable fix
         int poolNumber = WEBSOCKET_POOL_NUMBER + i;
         auto newDatabaseInterface = new Servatrice_DatabaseInterface(poolNumber, server);
         auto newPool = new Servatrice_ConnectionPool(newDatabaseInterface);
