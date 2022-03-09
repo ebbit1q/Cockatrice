@@ -16,8 +16,6 @@ class QRadioButton;
 class QLabel;
 class QDockWidget;
 class QWidget;
-class QGridLayout;
-class QVBoxLayout;
 class QTableWidget;
 class CommandContainer;
 class Response;
@@ -37,11 +35,10 @@ private:
     QDockWidget *searchDock;
     QWidget *searchDockContents;
     QPushButton *getButton, *clearButton;
-    QGridLayout *criteriaGrid, *locationGrid, *rangeGrid, *maxResultsGrid, *descriptionGrid, *buttonGrid;
     QGroupBox *criteriaGroupBox, *locationGroupBox, *rangeGroupBox, *maxResultsGroupBox, *descriptionGroupBox,
         *buttonGroupBox;
-    QVBoxLayout *mainLayout;
     QTableWidget *roomTable, *gameTable, *chatTable;
+    QTabWidget *tabManager;
 
     void createDock();
 signals:

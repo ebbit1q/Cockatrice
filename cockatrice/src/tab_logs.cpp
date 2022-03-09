@@ -27,25 +27,19 @@ TabLog::TabLog(TabSupervisor *_tabSupervisor, AbstractClient *_client, QWidget *
     roomTable = new QTableWidget();
     roomTable->setColumnCount(6);
     roomTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    roomTable->setHorizontalHeaderLabels(
-        QString(tr("Time;SenderName;SenderIP;Message;TargetID;TargetName")).split(";"));
 
-    gameTable = new QTableWidget();
+    gameTable = new QTableWidget(this);
     gameTable->setColumnCount(6);
     gameTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    gameTable->setHorizontalHeaderLabels(
-        QString(tr("Time;SenderName;SenderIP;Message;TargetID;TargetName")).split(";"));
 
-    chatTable = new QTableWidget();
+    chatTable = new QTableWidget(this);
     chatTable->setColumnCount(6);
     chatTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    chatTable->setHorizontalHeaderLabels(
-        QString(tr("Time;SenderName;SenderIP;Message;TargetID;TargetName")).split(";"));
 
-    QTabWidget *tabManager = new QTabWidget();
-    tabManager->addTab(roomTable, tr("Room Logs"));
-    tabManager->addTab(gameTable, tr("Game Logs"));
-    tabManager->addTab(chatTable, tr("Chat Logs"));
+    tabManager = new QTabWidget(this);
+    tabManager->addTab(roomTable, "");
+    tabManager->addTab(gameTable, "");
+    tabManager->addTab(chatTable, "");
     setCentralWidget(tabManager);
 
     createDock();
@@ -60,6 +54,35 @@ TabLog::~TabLog()
 
 void TabLog::retranslateUi()
 {
+    chatTable->setHorizontalHeaderLabels(
+        QString(tr("Time;SenderName;SenderIP;Message;TargetID;TargetName")).split(";"));
+    gameTable->setHorizontalHeaderLabels(
+        QString(tr("Time;SenderName;SenderIP;Message;TargetID;TargetName")).split(";"));
+    roomTable->setHorizontalHeaderLabels(
+        QString(tr("Time;SenderName;SenderIP;Message;TargetID;TargetName")).split(";"));
+    tabManager->setTabText(0, tr("Room Logs"));
+    tabManager->setTabText(1, tr("Game Logs"));
+    tabManager->setTabText(2, tr("Chat Logs"));
+    labelFindUserName->setText(tr("Username: "));
+    labelFindIPAddress->setText(tr("IP Address: "));
+    labelFindGameName->setText(tr("Game Name: "));
+    labelFindGameID->setText(tr("GameID: "));
+    labelMessage->setText(tr("Message: "));
+    mainRoom->setText(tr("Main Room"));
+    gameRoom->setText(tr("Game Room"));
+    privateChat->setText(tr("Private Chat"));
+    pastDays->setText(tr("Past X Days: "));
+    today->setText(tr("Today"));
+    lastHour->setText(tr("Last Hour"));
+    labelMaximum->setText(tr("Maximum Results: "));
+    labelDescription->setText(tr(
+        "At least one filter is required.\nThe more information you put in, the more specific your results will be."));
+    getButton->setText(tr("Get User Logs"));
+    clearButton->setText(tr("Clear Filters"));
+    criteriaGroupBox->setTitle(tr("Filters"));
+    locationGroupBox->setTitle(tr("Log Locations"));
+    rangeGroupBox->setTitle(tr("Date Range"));
+    maxResultsGroupBox->setTitle(tr("Maximum Results"));
 }
 
 void TabLog::getClicked()
@@ -147,53 +170,52 @@ void TabLog::clearClicked()
 
 void TabLog::createDock()
 {
-    labelFindUserName = new QLabel(tr("Username: "));
+    labelFindUserName = new QLabel(this);
     findUsername = new LineEditUnfocusable("");
     findUsername->setMaxLength(MAX_NAME_LENGTH);
     findUsername->setAlignment(Qt::AlignCenter);
-    labelFindIPAddress = new QLabel(tr("IP Address: "));
+    labelFindIPAddress = new QLabel(this);
     findIPAddress = new LineEditUnfocusable("");
     findIPAddress->setMaxLength(MAX_NAME_LENGTH);
     findIPAddress->setAlignment(Qt::AlignCenter);
-    labelFindGameName = new QLabel(tr("Game Name: "));
+    labelFindGameName = new QLabel(this);
     findGameName = new LineEditUnfocusable("");
     findGameName->setMaxLength(MAX_NAME_LENGTH);
     findGameName->setAlignment(Qt::AlignCenter);
-    labelFindGameID = new QLabel(tr("GameID: "));
+    labelFindGameID = new QLabel(this);
     findGameID = new LineEditUnfocusable("");
     findGameID->setMaxLength(MAX_NAME_LENGTH);
     findGameID->setAlignment(Qt::AlignCenter);
-    labelMessage = new QLabel(tr("Message: "));
+    labelMessage = new QLabel(this);
     findMessage = new LineEditUnfocusable("");
     findMessage->setMaxLength(MAX_TEXT_LENGTH);
     findMessage->setAlignment(Qt::AlignCenter);
 
-    mainRoom = new QCheckBox(tr("Main Room"));
-    gameRoom = new QCheckBox(tr("Game Room"));
-    privateChat = new QCheckBox(tr("Private Chat"));
+    mainRoom = new QCheckBox(this);
+    gameRoom = new QCheckBox(this);
+    privateChat = new QCheckBox(this);
 
-    pastDays = new QRadioButton(tr("Past X Days: "));
-    today = new QRadioButton(tr("Today"));
-    lastHour = new QRadioButton(tr("Last Hour"));
-    pastXDays = new QSpinBox;
+    pastDays = new QRadioButton(this);
+    today = new QRadioButton(this);
+    lastHour = new QRadioButton(this);
+    pastXDays = new QSpinBox(this);
     pastXDays->setMaximum(20);
 
-    labelMaximum = new QLabel(tr("Maximum Results: "));
+    labelMaximum = new QLabel(this);
     maximumResults = new QSpinBox;
     maximumResults->setMaximum(1000);
 
-    labelDescription = new QLabel(tr(
-        "At least one filter is required.\nThe more information you put in, the more specific your results will be."));
+    labelDescription = new QLabel(this);
 
-    getButton = new QPushButton(tr("Get User Logs"));
+    getButton = new QPushButton(this);
     getButton->setAutoDefault(true);
     connect(getButton, SIGNAL(clicked()), this, SLOT(getClicked()));
 
-    clearButton = new QPushButton(tr("Clear Filters"));
+    clearButton = new QPushButton(this);
     clearButton->setAutoDefault(true);
     connect(clearButton, SIGNAL(clicked()), this, SLOT(clearClicked()));
 
-    criteriaGrid = new QGridLayout;
+    auto *criteriaGrid = new QGridLayout;
     criteriaGrid->addWidget(labelFindUserName, 0, 0);
     criteriaGrid->addWidget(findUsername, 0, 1);
     criteriaGrid->addWidget(labelFindIPAddress, 1, 0);
@@ -205,49 +227,49 @@ void TabLog::createDock()
     criteriaGrid->addWidget(labelMessage, 4, 0);
     criteriaGrid->addWidget(findMessage, 4, 1);
 
-    criteriaGroupBox = new QGroupBox(tr("Filters"));
+    criteriaGroupBox = new QGroupBox(this);
     criteriaGroupBox->setLayout(criteriaGrid);
     criteriaGroupBox->setMaximumSize(500, 300);
     criteriaGroupBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    locationGrid = new QGridLayout;
+    auto *locationGrid = new QGridLayout;
     locationGrid->addWidget(mainRoom, 0, 0);
     locationGrid->addWidget(gameRoom, 0, 1);
     locationGrid->addWidget(privateChat, 0, 2);
 
-    locationGroupBox = new QGroupBox(tr("Log Locations"));
+    locationGroupBox = new QGroupBox(this);
     locationGroupBox->setLayout(locationGrid);
 
-    rangeGrid = new QGridLayout;
+    auto *rangeGrid = new QGridLayout;
     rangeGrid->addWidget(pastDays, 0, 0);
     rangeGrid->addWidget(pastXDays, 0, 1);
     rangeGrid->addWidget(today, 0, 2);
     rangeGrid->addWidget(lastHour, 0, 3);
 
-    rangeGroupBox = new QGroupBox(tr("Date Range"));
+    rangeGroupBox = new QGroupBox(this);
     rangeGroupBox->setLayout(rangeGrid);
 
-    maxResultsGrid = new QGridLayout;
+    auto *maxResultsGrid = new QGridLayout;
     maxResultsGrid->addWidget(labelMaximum, 0, 0);
     maxResultsGrid->addWidget(maximumResults, 0, 1);
 
-    maxResultsGroupBox = new QGroupBox(tr("Maximum Results"));
+    maxResultsGroupBox = new QGroupBox(this);
     maxResultsGroupBox->setLayout(maxResultsGrid);
 
-    descriptionGrid = new QGridLayout;
+    auto *descriptionGrid = new QGridLayout;
     descriptionGrid->addWidget(labelDescription, 0, 0);
 
-    descriptionGroupBox = new QGroupBox(tr(""));
+    descriptionGroupBox = new QGroupBox(this);
     descriptionGroupBox->setLayout(descriptionGrid);
 
-    buttonGrid = new QGridLayout;
+    auto *buttonGrid = new QGridLayout;
     buttonGrid->addWidget(getButton, 0, 0);
     buttonGrid->addWidget(clearButton, 0, 1);
 
-    buttonGroupBox = new QGroupBox(tr(""));
+    buttonGroupBox = new QGroupBox(this);
     buttonGroupBox->setLayout(buttonGrid);
 
-    mainLayout = new QVBoxLayout(this);
+    auto *mainLayout = new QVBoxLayout;
     mainLayout->addWidget(criteriaGroupBox);
     mainLayout->addWidget(locationGroupBox);
     mainLayout->addWidget(rangeGroupBox);
