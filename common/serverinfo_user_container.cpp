@@ -13,10 +13,10 @@ ServerInfo_User_Container::ServerInfo_User_Container(const ServerInfo_User &_use
 
 ServerInfo_User_Container::ServerInfo_User_Container(const ServerInfo_User_Container &other)
 {
-    if (other.userInfo)
+    if (other.userInfo != nullptr)
         userInfo = new ServerInfo_User(*other.userInfo);
     else
-        userInfo = 0;
+        userInfo = nullptr;
 }
 
 ServerInfo_User_Container::~ServerInfo_User_Container()
@@ -26,6 +26,7 @@ ServerInfo_User_Container::~ServerInfo_User_Container()
 
 void ServerInfo_User_Container::setUserInfo(const ServerInfo_User &_userInfo)
 {
+    delete userInfo;
     userInfo = new ServerInfo_User(_userInfo);
 }
 
