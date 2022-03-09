@@ -28,7 +28,7 @@ void ServerLogger::startLog(const QString &logFileName)
         QDir fileDir(fi.path());
         if (!fileDir.exists() && !fileDir.mkpath(fileDir.absolutePath())) {
             std::cerr << "ERROR: logfile folder doesn't exist and i can't create it." << std::endl;
-            logFile = 0;
+            logFile = nullptr;
             return;
         }
 
@@ -36,18 +36,18 @@ void ServerLogger::startLog(const QString &logFileName)
         if (!logFile->open(QIODevice::Append)) {
             std::cerr << "ERROR: can't open() logfile." << std::endl;
             delete logFile;
-            logFile = 0;
+            logFile = nullptr;
             return;
         }
     } else
-        logFile = 0;
+        logFile = nullptr;
 
     connect(this, SIGNAL(sigFlushBuffer()), this, SLOT(flushBuffer()), Qt::QueuedConnection);
 }
 
 void ServerLogger::logMessage(QString message, void *caller)
 {
-    if (!logFile)
+    if (logFile == nullptr)
         return;
 
     QString callerString;
@@ -80,35 +80,40 @@ void ServerLogger::logMessage(QString message, void *caller)
     if (shouldWeSkipLine)
         return;
 
-    bufferMutex.lock();
-    buffer.append(QDateTime::currentDateTime().toString() + " " + callerString + message);
-    bufferMutex.unlock();
-    emit sigFlushBuffer();
+    {
+        QMutexLocker locker(&bufferMutex);
+        buffer.append(QDateTime::currentDateTime().toString() + " " + callerString + message);
+        emit sigFlushBuffer();
+    }
 }
 
 void ServerLogger::flushBuffer()
 {
-    if (flushRunning)
-        return;
-
-    flushRunning = true;
-    QTextStream stream(logFile);
-    forever
     {
-        bufferMutex.lock();
-        if (buffer.isEmpty()) {
-            bufferMutex.unlock();
-            flushRunning = false;
+        QMutexLocker locker(&bufferMutex);
+        if (flushRunning)
             return;
+
+        flushRunning = true;
+    }
+    QTextStream stream(logFile);
+    QString message;
+    for (;;) {
+        {
+            QMutexLocker locker(&bufferMutex);
+            if (buffer.isEmpty()) {
+                flushRunning = false;
+                break;
+            }
+            message = buffer.takeFirst();
         }
-        QString message = buffer.takeFirst();
-        bufferMutex.unlock();
 
         stream << message << "\n";
         stream.flush();
 
-        if (logToConsole)
+        if (logToConsole) {
             std::cout << message.toStdString() << std::endl;
+        }
     }
 }
 

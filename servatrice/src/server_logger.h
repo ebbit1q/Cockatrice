@@ -14,11 +14,11 @@ class ServerLogger : public QObject
 {
     Q_OBJECT
 public:
-    ServerLogger(bool _logToConsole, QObject *parent = 0);
+    ServerLogger(bool _logToConsole, QObject *parent = nullptr);
     ~ServerLogger();
 public slots:
     void startLog(const QString &logFileName);
-    void logMessage(QString message, void *caller = 0);
+    void logMessage(QString message, void *caller = nullptr);
     void rotateLogs();
 private slots:
     void flushBuffer();
