@@ -13,13 +13,34 @@
 
 class Servatrice;
 
+class PreparedStatement
+{
+    static const QString dbPrefixReplace;
+    QSqlQuery *query;
+    const QString &text;
+    int hits;
+
+public:
+    PreparedStatement(const QString &queryText);
+    ~PreparedStatement();
+
+    QSqlQuery *getQuery();
+    inline const QString &getText() const {return text;};
+    inline bool consume(){return --hits == 0;};
+}
+
 class Servatrice_DatabaseInterface : public Server_DatabaseInterface
 {
     Q_OBJECT
 private:
     int instanceId;
     QSqlDatabase sqlDatabase;
-    QHash<QString, QSqlQuery *> preparedStatements;
+    // a cache of prepared statements, used by prepareQuery
+    QHash<QString, PreparedStatement> preparedStatements;
+    // max amount of entries in the queue
+    static constexpr int maxStatements = 0xffff;
+    // preparedStatements can have multiple entries in the queue if they get requested from the cache
+    QList<PreparedStatement *> statementQueue;
     Servatrice *server;
     ServerInfo_User evalUserQueryResult(const QSqlQuery *query, bool complete, bool withId = false);
     /** Must be called after checkSql and server is known to be in auth mode. */
@@ -51,6 +72,7 @@ public:
                       const QString &password);
     bool openDatabase();
     bool checkSql();
+    void prunePreparedQuery();
     QSqlQuery *prepareQuery(const QString &queryText);
     bool execSqlQuery(QSqlQuery *query);
     const QSqlDatabase &getDatabase()

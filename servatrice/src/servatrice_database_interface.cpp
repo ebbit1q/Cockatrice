@@ -13,6 +13,27 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
+static const QString PreparedStatement::dbPrefixReplace("{prefix}");
+
+PreparedStatement::PreparedStatement(const QString &queryText) : hits(0)
+{
+    text = queryText;
+    QString prefixedQueryText = queryText;
+    prefixedQueryText.replace(dbPrefixReplace, server->getDbPrefix());
+    query = new QSqlQuery(sqlDatabase);
+    query->prepare(prefixedQueryText);
+}
+
+PreparedStatement::~PreparedStatement()
+{
+    delete query;
+}
+
+QSqlQuery *PreparedStatement::getQuery() {
+    ++hits;
+    return query;
+};
+
 Servatrice_DatabaseInterface::Servatrice_DatabaseInterface(int _instanceId, Servatrice *_server)
     : instanceId(_instanceId), sqlDatabase(QSqlDatabase()), server(_server)
 {
@@ -20,10 +41,8 @@ Servatrice_DatabaseInterface::Servatrice_DatabaseInterface(int _instanceId, Serv
 
 Servatrice_DatabaseInterface::~Servatrice_DatabaseInterface()
 {
-    // reset all prepared statements
-    qDeleteAll(preparedStatements);
     preparedStatements.clear();
-
+    statementQueue.clear();
     sqlDatabase.close();
 }
 
@@ -96,8 +115,8 @@ bool Servatrice_DatabaseInterface::openDatabase()
     }
 
     // reset all prepared statements
-    qDeleteAll(preparedStatements);
     preparedStatements.clear();
+    statementQueue.clear();
     return true;
 }
 
@@ -111,18 +130,27 @@ bool Servatrice_DatabaseInterface::checkSql()
     return true;
 }
 
+void Servatrice_DatabaseInterface::prunePreparedQuery()
+{
+    if(statementQueue.length() == maxStatements) {
+        auto *statement = statementQueue.takeFirst();
+        if(statement.removable()) {
+            preparedStatements.remove(statement.getText());
+        }
+    }
+}
+
 QSqlQuery *Servatrice_DatabaseInterface::prepareQuery(const QString &queryText)
 {
-    if (preparedStatements.contains(queryText))
-        return preparedStatements.value(queryText);
-
-    QString prefixedQueryText = queryText;
-    prefixedQueryText.replace("{prefix}", server->getDbPrefix());
-    QSqlQuery *query = new QSqlQuery(sqlDatabase);
-    query->prepare(prefixedQueryText);
-
-    preparedStatements.insert(queryText, query);
-    return query;
+    PreparedStatement &statement;
+    if (preparedStatements.contains(queryText)) {
+        prunePreparedQuery();
+        statement = preparedStatements.value(queryText);
+    } else {
+        statement = preparedStatements.insert(queryText, PreparedStatement(queryText));
+    }
+    statementQueue.append(statement);
+    return statement->getQuery();
 }
 
 bool Servatrice_DatabaseInterface::execSqlQuery(QSqlQuery *query)
