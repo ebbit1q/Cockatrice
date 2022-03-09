@@ -92,28 +92,30 @@ Server_Game::Server_Game(const ServerInfo_User &_creatorInfo,
 
 Server_Game::~Server_Game()
 {
-    room->gamesLock.lockForWrite();
-    gameMutex.lock();
+    {
+        QReadLocker roomLocker(&room->gamesLock);
+        QMutexLocker gameLocker(&gameMutex);
 
-    gameClosed = true;
-    sendGameEventContainer(prepareGameEvent(Event_GameClosed(), -1));
-    for (Server_Player *player : players.values()) {
-        player->prepareDestroy();
+        gameClosed = true;
+        sendGameEventContainer(prepareGameEvent(Event_GameClosed(), -1));
+        for (Server_Player *player : players.values()) {
+            player->prepareDestroy();
+            delete player;
+        }
+        players.clear();
+
+        room->removeGame(this);
+        delete creatorInfo;
+        creatorInfo = nullptr;
     }
-    players.clear();
 
-    room->removeGame(this);
-    delete creatorInfo;
-    creatorInfo = 0;
-
-    gameMutex.unlock();
-    room->gamesLock.unlock();
     currentReplay->set_duration_seconds(secondsElapsed - startTimeOfThisGame);
     replayList.append(currentReplay);
     storeGameInformation();
 
-    for (int i = 0; i < replayList.size(); ++i)
-        delete replayList[i];
+    for (auto *replay : replayList) {
+        delete replay;
+    }
 
     qDebug() << "Server_Game destructor: gameId=" << gameId;
 }
@@ -139,11 +141,11 @@ void Server_Game::storeGameInformation()
         replayMatchInfo->add_player_names(playerName.toStdString());
     }
 
-    for (int i = 0; i < replayList.size(); ++i) {
+    for (auto *replay : replayList) {
         ServerInfo_Replay *replayInfo = replayMatchInfo->add_replay_list();
-        replayInfo->set_replay_id(replayList[i]->replay_id());
+        replayInfo->set_replay_id(replay->replay_id());
         replayInfo->set_replay_name(gameInfo.description());
-        replayInfo->set_duration(replayList[i]->duration_seconds());
+        replayInfo->set_duration(replay->duration_seconds());
     }
 
     SessionEvent *sessionEvent = Server_ProtocolHandler::prepareSessionEvent(replayEvent);
