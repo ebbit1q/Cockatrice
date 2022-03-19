@@ -39,16 +39,13 @@ Server_Room::~Server_Room()
 {
     qDebug("Server_Room destructor");
 
-    gamesLock.lockForWrite();
-    const QList<Server_Game *> gameList = games.values();
-    for (int i = 0; i < gameList.size(); ++i)
-        delete gameList[i];
+    QWriteLocker gamesLocker(&gamesLock);
+    for (auto *game : games.values())
+        delete game;
     games.clear();
-    gamesLock.unlock();
 
-    usersLock.lockForWrite();
+    QWriteLocker usersLocker(&usersLock);
     users.clear();
-    usersLock.unlock();
 }
 
 bool Server_Room::userMayJoin(const ServerInfo_User &userInfo)
@@ -87,33 +84,35 @@ Server_Room::getInfo(ServerInfo_Room &result, bool complete, bool showGameTypes,
     result.set_permissionlevel(permissionLevel.toStdString());
     result.set_privilegelevel(privilegeLevel.toStdString());
 
-    gamesLock.lockForRead();
-    result.set_game_count(games.size() + externalGames.size());
-    if (complete) {
-        QMapIterator<int, Server_Game *> gameIterator(games);
-        while (gameIterator.hasNext())
-            gameIterator.next().value()->getInfo(*result.add_game_list());
-        if (includeExternalData) {
-            QMapIterator<int, ServerInfo_Game> externalGameIterator(externalGames);
-            while (externalGameIterator.hasNext())
-                result.add_game_list()->CopyFrom(externalGameIterator.next().value());
+    {
+        QReadLocker gamesLocker(&gamesLock);
+        result.set_game_count(games.size() + externalGames.size());
+        if (complete) {
+            QMapIterator<int, Server_Game *> gameIterator(games);
+            while (gameIterator.hasNext())
+                gameIterator.next().value()->getInfo(*result.add_game_list());
+            if (includeExternalData) {
+                QMapIterator<int, ServerInfo_Game> externalGameIterator(externalGames);
+                while (externalGameIterator.hasNext())
+                    result.add_game_list()->CopyFrom(externalGameIterator.next().value());
+            }
         }
     }
-    gamesLock.unlock();
 
-    usersLock.lockForRead();
-    result.set_player_count(users.size() + externalUsers.size());
-    if (complete) {
-        QMapIterator<QString, Server_ProtocolHandler *> userIterator(users);
-        while (userIterator.hasNext())
-            result.add_user_list()->CopyFrom(userIterator.next().value()->copyUserInfo(false));
-        if (includeExternalData) {
-            QMapIterator<QString, ServerInfo_User_Container> externalUserIterator(externalUsers);
-            while (externalUserIterator.hasNext())
-                result.add_user_list()->CopyFrom(externalUserIterator.next().value().copyUserInfo(false));
+    {
+        QReadLocker usersLocker(&usersLock);
+        result.set_player_count(users.size() + externalUsers.size());
+        if (complete) {
+            QMapIterator<QString, Server_ProtocolHandler *> userIterator(users);
+            while (userIterator.hasNext())
+                result.add_user_list()->CopyFrom(userIterator.next().value()->copyUserInfo(false));
+            if (includeExternalData) {
+                QMapIterator<QString, ServerInfo_User_Container> externalUserIterator(externalUsers);
+                while (externalUserIterator.hasNext())
+                    result.add_user_list()->CopyFrom(externalUserIterator.next().value().copyUserInfo(false));
+            }
         }
     }
-    usersLock.unlock();
 
     if (complete || showGameTypes)
         for (int i = 0; i < gameTypes.size(); ++i) {
@@ -144,39 +143,29 @@ void Server_Room::addClient(Server_ProtocolHandler *client)
     ServerInfo_Room roomInfo;
     roomInfo.set_room_id(id);
 
-    usersLock.lockForWrite();
-    users.insert(QString::fromStdString(client->getUserInfo()->name()), client);
-    roomInfo.set_player_count(users.size() + externalUsers.size());
-    usersLock.unlock();
-
-    // XXX This can be removed during the next client update.
-    gamesLock.lockForRead();
-    roomInfo.set_game_count(games.size() + externalGames.size());
-    gamesLock.unlock();
-    // -----------
+    {
+        QWriteLocker usersLocker(&usersLock);
+        users.insert(QString::fromStdString(client->getUserInfo()->name()), client);
+        roomInfo.set_player_count(users.size() + externalUsers.size());
+    }
 
     emit roomInfoChanged(roomInfo);
 }
 
 void Server_Room::removeClient(Server_ProtocolHandler *client)
 {
-    usersLock.lockForWrite();
-    users.remove(QString::fromStdString(client->getUserInfo()->name()));
-
     ServerInfo_Room roomInfo;
-    roomInfo.set_room_id(id);
-    roomInfo.set_player_count(users.size() + externalUsers.size());
-    usersLock.unlock();
+    {
+        QWriteLocker usersLocker(&usersLock);
+        users.remove(QString::fromStdString(client->getUserInfo()->name()));
+
+        roomInfo.set_room_id(id);
+        roomInfo.set_player_count(users.size() + externalUsers.size());
+    }
 
     Event_LeaveRoom event;
     event.set_name(client->getUserInfo()->name());
     sendRoomEvent(prepareRoomEvent(event));
-
-    // XXX This can be removed during the next client update.
-    gamesLock.lockForRead();
-    roomInfo.set_game_count(games.size() + externalGames.size());
-    gamesLock.unlock();
-    // -----------
 
     emit roomInfoChanged(roomInfo);
 }
@@ -192,10 +181,11 @@ void Server_Room::addExternalUser(const ServerInfo_User &userInfo)
     ServerInfo_Room roomInfo;
     roomInfo.set_room_id(id);
 
-    usersLock.lockForWrite();
-    externalUsers.insert(QString::fromStdString(userInfo.name()), userInfoContainer);
-    roomInfo.set_player_count(users.size() + externalUsers.size());
-    usersLock.unlock();
+    {
+        QWriteLocker usersLocker(&usersLock);
+        externalUsers.insert(QString::fromStdString(userInfo.name()), userInfoContainer);
+        roomInfo.set_player_count(users.size() + externalUsers.size());
+    }
 
     emit roomInfoChanged(roomInfo);
 }
@@ -206,11 +196,13 @@ void Server_Room::removeExternalUser(const QString &name)
     ServerInfo_Room roomInfo;
     roomInfo.set_room_id(id);
 
-    usersLock.lockForWrite();
-    if (externalUsers.contains(name))
-        externalUsers.remove(name);
-    roomInfo.set_player_count(users.size() + externalUsers.size());
-    usersLock.unlock();
+    {
+        QWriteLocker usersLocker(&usersLock);
+        if (externalUsers.contains(name)) {
+            externalUsers.remove(name);
+        }
+        roomInfo.set_player_count(users.size() + externalUsers.size());
+    }
 
     Event_LeaveRoom event;
     event.set_name(name.toStdString());
@@ -225,13 +217,14 @@ void Server_Room::updateExternalGameList(const ServerInfo_Game &gameInfo)
     ServerInfo_Room roomInfo;
     roomInfo.set_room_id(id);
 
-    gamesLock.lockForWrite();
-    if (!gameInfo.has_player_count() && externalGames.contains(gameInfo.game_id()))
-        externalGames.remove(gameInfo.game_id());
-    else
-        externalGames.insert(gameInfo.game_id(), gameInfo);
-    roomInfo.set_game_count(games.size() + externalGames.size());
-    gamesLock.unlock();
+    {
+        QWriteLocker gamesLocker(&gamesLock);
+        if (!gameInfo.has_player_count() && externalGames.contains(gameInfo.game_id()))
+            externalGames.remove(gameInfo.game_id());
+        else
+            externalGames.insert(gameInfo.game_id(), gameInfo);
+        roomInfo.set_game_count(games.size() + externalGames.size());
+    }
 
     broadcastGameListUpdate(gameInfo, false);
     emit roomInfoChanged(roomInfo);
@@ -246,9 +239,9 @@ Response::ResponseCode Server_Room::processJoinGameCommand(const Command_JoinGam
     // This function is called from the Server thread and from the S_PH thread.
     // server->roomsMutex is always locked.
 
-    QReadLocker roomGamesLocker(&gamesLock);
+    QReadLocker gamesLocker(&gamesLock);
     Server_Game *game = games.value(cmd.game_id());
-    if (!game) {
+    if (game == nullptr) {
         if (externalGames.contains(cmd.game_id())) {
             CommandContainer cont;
             cont.set_cmd_id(rc.getCmdId());
@@ -291,13 +284,12 @@ void Server_Room::say(const QString &userName, const QString &userMessage, bool 
         chatMessage.set_sender_name(userName.toStdString());
         chatMessage.set_message(userMessage.simplified().toStdString());
 
-        historyLock.lockForWrite();
+        QWriteLocker historyLocker(&historyLock);
         if (chatHistory.size() >= chatHistorySize) {
             chatHistory.removeAt(0);
         }
 
         chatHistory.push_back(std::move(chatMessage));
-        historyLock.unlock();
     }
 }
 
@@ -311,7 +303,7 @@ void Server_Room::removeSaidMessages(const QString &userName, int amount, bool s
 
     if (chatHistorySize != 0) {
         int removed = 0;
-        historyLock.lockForWrite();
+        QWriteLocker historyLocker(&historyLock);
         // redact [amount] of the most recent messages from this user from history
         for (auto message = chatHistory.rbegin(); message != chatHistory.rend() && removed != amount; ++message) {
             if (message->sender_name() == stdStringUserName) {
@@ -319,19 +311,17 @@ void Server_Room::removeSaidMessages(const QString &userName, int amount, bool s
                 ++removed;
             }
         }
-        historyLock.unlock();
     }
 }
 
 void Server_Room::sendRoomEvent(RoomEvent *event, bool sendToIsl)
 {
-    usersLock.lockForRead();
     {
-        QMapIterator<QString, Server_ProtocolHandler *> userIterator(users);
-        while (userIterator.hasNext())
-            userIterator.next().value()->sendProtocolItem(*event);
+        QReadLocker usersLocker(&usersLock);
+        for (auto *user : users.values()) {
+            user->sendProtocolItem(*event);
+        }
     }
-    usersLock.unlock();
 
     if (sendToIsl)
         static_cast<Server *>(parent())->sendIsl_RoomEvent(*event);
@@ -348,25 +338,21 @@ void Server_Room::broadcastGameListUpdate(const ServerInfo_Game &gameInfo, bool 
 
 void Server_Room::addGame(Server_Game *game)
 {
+    ServerInfo_Game gameInfo;
     ServerInfo_Room roomInfo;
     roomInfo.set_room_id(id);
 
-    gamesLock.lockForWrite();
-    connect(game, SIGNAL(gameInfoChanged(ServerInfo_Game)), this, SLOT(broadcastGameListUpdate(ServerInfo_Game)));
+    {
+        QWriteLocker gamesLocker(&gamesLock);
+        connect(game, SIGNAL(gameInfoChanged(ServerInfo_Game)), this, SLOT(broadcastGameListUpdate(ServerInfo_Game)));
 
-    game->gameMutex.lock();
-    games.insert(game->getGameId(), game);
-    ServerInfo_Game gameInfo;
-    game->getInfo(gameInfo);
-    roomInfo.set_game_count(games.size() + externalGames.size());
-    game->gameMutex.unlock();
-    gamesLock.unlock();
-
-    // XXX This can be removed during the next client update.
-    usersLock.lockForRead();
-    roomInfo.set_player_count(users.size() + externalUsers.size());
-    usersLock.unlock();
-    // -----------
+        {
+            QMutexLocker gameLocker(&game->gameMutex);
+            games.insert(game->getGameId(), game);
+            game->getInfo(gameInfo);
+            roomInfo.set_game_count(games.size() + externalGames.size());
+        }
+    }
 
     emit gameListChanged(gameInfo);
     emit roomInfoChanged(roomInfo);
@@ -389,18 +375,12 @@ void Server_Room::removeGame(Server_Game *game)
     roomInfo.set_room_id(id);
     roomInfo.set_game_count(games.size() + externalGames.size());
 
-    // XXX This can be removed during the next client update.
-    usersLock.lockForRead();
-    roomInfo.set_player_count(users.size() + externalUsers.size());
-    usersLock.unlock();
-    // -----------
-
     emit roomInfoChanged(roomInfo);
 }
 
 int Server_Room::getGamesCreatedByUser(const QString &userName) const
 {
-    QReadLocker locker(&gamesLock);
+    QReadLocker gamesLocker(&gamesLock);
 
     QMapIterator<int, Server_Game *> gamesIterator(games);
     int result = 0;
@@ -412,7 +392,7 @@ int Server_Room::getGamesCreatedByUser(const QString &userName) const
 
 QList<ServerInfo_Game> Server_Room::getGamesOfUser(const QString &userName) const
 {
-    QReadLocker locker(&gamesLock);
+    QReadLocker gamesLocker(&gamesLock);
 
     QList<ServerInfo_Game> result;
     QMapIterator<int, Server_Game *> gamesIterator(games);

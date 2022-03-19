@@ -55,36 +55,28 @@ void Server_ProtocolHandler::prepareDestroy()
         room->removeClient(this);
     }
 
-    QMap<int, QPair<int, int>> tempGames(getGames());
+    {
+        QMap<int, QPair<int, int>> tempGames(getGames());
+        QReadLocker roomsLocker(&server->roomsLock);
+        QMapIterator<int, QPair<int, int>> gameIterator(tempGames);
+        while (gameIterator.hasNext()) {
+            gameIterator.next();
 
-    server->roomsLock.lockForRead();
-    QMapIterator<int, QPair<int, int>> gameIterator(tempGames);
-    while (gameIterator.hasNext()) {
-        gameIterator.next();
+            Server_Room *room = server->getRooms().value(gameIterator.value().first);
+            if (room == nullptr)
+                continue;
+            QReadLocker gamesLocker(&room->gamesLock);
+            Server_Game *game = room->getGames().value(gameIterator.key());
+            if (game == nullptr)
+                continue;
+            QMutexLocker gameLocker(&game->gameMutex);
+            Server_Player *serverPlayer = game->getPlayers().value(gameIterator.value().second);
+            if (serverPlayer == nullptr)
+                continue;
 
-        Server_Room *room = server->getRooms().value(gameIterator.value().first);
-        if (!room)
-            continue;
-        room->gamesLock.lockForRead();
-        Server_Game *game = room->getGames().value(gameIterator.key());
-        if (!game) {
-            room->gamesLock.unlock();
-            continue;
+            serverPlayer->disconnectClient();
         }
-        game->gameMutex.lock();
-        Server_Player *p = game->getPlayers().value(gameIterator.value().second);
-        if (!p) {
-            game->gameMutex.unlock();
-            room->gamesLock.unlock();
-            continue;
-        }
-
-        p->disconnectClient();
-
-        game->gameMutex.unlock();
-        room->gamesLock.unlock();
     }
-    server->roomsLock.unlock();
 
     server->removeClient(this);
 
@@ -601,18 +593,18 @@ Response::ResponseCode Server_ProtocolHandler::cmdGetGamesOfUser(const Command_G
     // The client needs to deal with an empty result list.
 
     Response_GetGamesOfUser *re = new Response_GetGamesOfUser;
-    server->roomsLock.lockForRead();
-    QMapIterator<int, Server_Room *> roomIterator(server->getRooms());
-    while (roomIterator.hasNext()) {
-        Server_Room *room = roomIterator.next().value();
-        room->gamesLock.lockForRead();
-        room->getInfo(*re->add_room_list(), false, true);
-        QListIterator<ServerInfo_Game> gameIterator(room->getGamesOfUser(nameFromStdString(cmd.user_name())));
-        while (gameIterator.hasNext())
-            re->add_game_list()->CopyFrom(gameIterator.next());
-        room->gamesLock.unlock();
+    {
+        QReadLocker roomsLocker(&server->roomsLock);
+        QMapIterator<int, Server_Room *> roomIterator(server->getRooms());
+        while (roomIterator.hasNext()) {
+            Server_Room *room = roomIterator.next().value();
+            QReadLocker gamesLocker(&room->gamesLock);
+            room->getInfo(*re->add_room_list(), false, true);
+            QListIterator<ServerInfo_Game> gameIterator(room->getGamesOfUser(nameFromStdString(cmd.user_name())));
+            while (gameIterator.hasNext())
+                re->add_game_list()->CopyFrom(gameIterator.next());
+        }
     }
-    server->roomsLock.unlock();
 
     rc.setResponseExtension(re);
     return Response::RespOk;
