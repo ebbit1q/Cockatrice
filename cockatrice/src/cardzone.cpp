@@ -131,7 +131,7 @@ void CardZone::addCard(CardItem *card, bool reorganize, int x, int y)
     }
 
     card->setZone(this);
-    addCardImpl(card, x, y);
+    addCardImpl(card, x < 0 ? cards.size() + 1 + x : x, y);
 
     if (reorganize)
         reorganizeCards();
