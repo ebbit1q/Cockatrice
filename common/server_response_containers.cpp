@@ -18,15 +18,15 @@ GameEventStorageItem::~GameEventStorageItem()
     delete event;
 }
 
-GameEventStorage::GameEventStorage() : gameEventContext(0), privatePlayerId(0)
+GameEventStorage::GameEventStorage() : gameEventContext(nullptr), privatePlayerId(0)
 {
 }
 
 GameEventStorage::~GameEventStorage()
 {
     delete gameEventContext;
-    for (int i = 0; i < gameEventList.size(); ++i)
-        delete gameEventList[i];
+    for (auto *event : gameEventList)
+        delete event;
 }
 
 void GameEventStorage::setGameEventContext(const ::google::protobuf::Message &_gameEventContext)
@@ -77,15 +77,15 @@ void GameEventStorage::sendToGame(Server_Game *game)
     game->sendGameEventContainer(contOthers, GameEventStorageItem::SendToOthers, id);
 }
 
-ResponseContainer::ResponseContainer(int _cmdId) : cmdId(_cmdId), responseExtension(0)
+ResponseContainer::ResponseContainer(int _cmdId) : cmdId(_cmdId), responseExtension(nullptr)
 {
 }
 
 ResponseContainer::~ResponseContainer()
 {
     delete responseExtension;
-    for (int i = 0; i < preResponseQueue.size(); ++i)
-        delete preResponseQueue[i].second;
-    for (int i = 0; i < postResponseQueue.size(); ++i)
-        delete postResponseQueue[i].second;
+    for (auto &item : preResponseQueue)
+        delete item.second;
+    for (auto &item : postResponseQueue)
+        delete item.second;
 }
