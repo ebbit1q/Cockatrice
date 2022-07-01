@@ -246,6 +246,8 @@ void DlgConnect::updateDisplayInfo(const QString &saveName)
 
     UserConnection_Information uci;
     QStringList data = uci.getServerInfo(saveName);
+    if (data.isEmpty())
+      return;
 
     bool savePasswordStatus = (data.at(5) == "1");
 
