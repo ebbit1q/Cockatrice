@@ -51,3 +51,9 @@ jobs:
       - name: Test app
         run: npm run test
         
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{matrix.node_version}}-build
+          path: webclient/build
+          if-no-files-found: error
