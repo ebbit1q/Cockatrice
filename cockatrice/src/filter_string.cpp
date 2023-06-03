@@ -34,7 +34,7 @@ Legality <- [Ll] 'egal'? / [Bb] 'anned'? / [Rr] 'estricted'
 
 TypeQuery <- [tT] 'ype'? [:] StringValue
 
-Color <- < [Ww] 'hite'? / [Uu] / [Bb] 'lack'? / [Rr] 'ed'? / [Gg] 'reen'?  / [Bb] 'lue'? >
+Color <- < [Ww] 'hite'? / [Uu] / [Bb] 'lack'? / [Rr] 'ed'? / [Gg] 'reen'?  / [Bb] 'lue'? / [Ff] / [Ss] 'ilver'? >
 ColorEx <- Color / [mc]
 
 ColorQuery <- [cC] 'olor'? <[iI]?> <[:!]> ColorEx*
@@ -328,7 +328,7 @@ static void setupParserRules()
         return [=](CardData x) { return matcher(x->getName()); };
     };
 
-    search["Color"] = [](const peg::SemanticValues &sv) -> char { return "WUBRGU"[sv.choice()]; };
+    search["Color"] = [](const peg::SemanticValues &sv) -> char { return "WUBRGUFF"[sv.choice()]; };
     search["ColorEx"] = [](const peg::SemanticValues &sv) -> char {
         return sv.choice() == 0 ? sv[0].get<char>() : *sv.c_str();
     };
