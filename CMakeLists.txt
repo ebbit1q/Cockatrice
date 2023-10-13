@@ -187,12 +187,14 @@ MESSAGE(STATUS "UPDATE TRANSLATIONS: ${UPDATE_TRANSLATIONS}")
 set(CMAKE_AUTOMOC TRUE)
 
 # Find other needed libraries
-FIND_PACKAGE(Protobuf REQUIRED)
-IF(NOT EXISTS "${Protobuf_PROTOC_EXECUTABLE}")
-    MESSAGE(FATAL_ERROR "No protoc command found!")
-ELSE()
-    MESSAGE(STATUS "Protoc version ${Protobuf_VERSION} found!")
-ENDIF()
+find_package(Protobuf CONFIG)
+if(NOT Protobuf_FOUND)
+  find_package(Protobuf REQUIRED)
+endif()
+
+if(${Protobuf_VERSION} VERSION_LESS "3.21.0.0" AND NOT EXISTS "${Protobuf_PROTOC_EXECUTABLE}")
+  message(FATAL_ERROR "No protoc command found!")
+endif()
 
 #Find OpenSSL
 IF(WIN32)
