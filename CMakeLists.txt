@@ -48,8 +48,8 @@ if(NOT DEFINED GIT_TAG_RELEASENAME)
     set(GIT_TAG_RELEASENAME "Prismatic Bridge")
 endif()
 
-# Use c++11 for all targets
-set(CMAKE_CXX_STANDARD 11 CACHE STRING "C++ ISO Standard")
+# Use c++17 for all targets
+set(CMAKE_CXX_STANDARD 17 CACHE STRING "C++ ISO Standard")
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Set conventional loops
