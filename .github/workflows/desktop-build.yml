@@ -320,6 +320,9 @@ jobs:
           VCPKG_DEFAULT_TRIPLET: 'x64-windows'
           VCPKG_DISABLE_METRICS: 1
 
+      - name: debug
+        uses: mxschmitt/action-tmate@v3
+
       - name: Build Cockatrice
         id: build
         shell: bash
