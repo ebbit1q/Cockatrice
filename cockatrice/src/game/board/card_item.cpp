@@ -323,7 +323,7 @@ void CardItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
             2 * QApplication::startDragDistance())
             return;
 
-        QColor arrowColor = Qt::red;
+        QColor arrowColor = Qt::magenta;
         if (event->modifiers().testFlag(Qt::ControlModifier))
             arrowColor = Qt::yellow;
         else if (event->modifiers().testFlag(Qt::AltModifier))
