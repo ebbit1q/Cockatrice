@@ -5,7 +5,7 @@
 
 # This script is meant to be used by the ci enironment on macos runners only.
 # It uses the runner's GITHUB_WORKSPACE env variable.
-arch=$(uname -m)
+export arch=$(uname -m)
 nproc=$(sysctl -n hw.ncpu)
 
 function thin() {
@@ -19,5 +19,6 @@ function thin() {
 export -f thin  # export to allow use in xargs
 
 echo "::group::Thinning Qt libraries to $arch using $nproc cores"
+echo "$GITHUB_WORKSPACE/Qt"
 find "$GITHUB_WORKSPACE/Qt" -type f -print0 | xargs -0 -n1 -P"$nproc" -I{} bash -c "thin '{}'"
 echo "::endgroup::"
