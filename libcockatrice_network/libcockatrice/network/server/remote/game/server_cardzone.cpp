@@ -101,7 +101,7 @@ void Server_CardZone::insertCardIntoCoordMap(Server_Card *card, int x, int y)
         return;
 
     coordinateMap[y].insert(x, card);
-    if (!(x % 3)) {
+    if ((x % 3) == 0) { // card is occupying empty pile
         if (!card->getFaceDown() && !freePilesMap[y].contains(card->getName(), x) && card->getAttachedCards().isEmpty())
             freePilesMap[y].insert(card->getName(), x);
         if (freeSpaceMap[y] == x) {
@@ -112,8 +112,8 @@ void Server_CardZone::insertCardIntoCoordMap(Server_Card *card, int x, int y)
                      coordinateMap[y].contains(nextFreeX + 2));
             freeSpaceMap[y] = nextFreeX;
         }
-    } else if (!((x - 2) % 3)) {
-        const int baseX = (x / 3) * 3;
+    } else if ((x % 3) == 2) { // card has filled up the pile
+        const int baseX = x - 2;
         freePilesMap[y].remove(coordinateMap[y].value(baseX)->getName(), baseX);
     }
 }
