@@ -107,8 +107,12 @@ jobs:
             package: skip    # We are packaged in Arch already
             allow-failure: yes
 
+          - distro: Debian
+            version: 11
+            package: DEB
+
           - distro: Servatrice_Debian
-            version: 12
+            version: 11
             package: DEB
             test: skip
             server_only: yes
@@ -132,9 +136,13 @@ jobs:
             package: RPM
 
           - distro: Ubuntu
-            version: 24.04
+            version: 22.04
             package: DEB
             test: skip    # Running tests on all distros is superfluous
+
+          - distro: Ubuntu
+            version: 24.04
+            package: DEB
 
           - distro: Ubuntu
             version: 26.04
